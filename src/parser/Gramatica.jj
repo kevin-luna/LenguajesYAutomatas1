@@ -1,0 +1,210 @@
+options {
+    STATIC = false;
+    IGNORE_CASE = true;
+}
+
+PARSER_BEGIN(PascalLexer)
+import java.io.*;
+
+public class PascalLexer {
+    public static void main(String[] args) throws ParseException {
+        PascalLexer lexer = new PascalLexer(new FileInputStream(args[0]));
+        Token token;
+        do {
+            token = lexer.getNextToken();
+            System.out.println(token);
+        } while (token.kind != 0);
+    }
+}
+
+PARSER_END(PascalLexer)
+
+SKIP : {
+    " " // Espacios en blanco
+  | "\t" // Tabuladores
+  | "\n" // Saltos de línea
+  | "\r" // Retornos de carro
+}
+
+TOKEN : {
+    < IDENTIFIER : (["a"-"z","A"-"Z"])+ (["a"-"z","A"-"Z","0"-"9","_"])* >
+  | < INTEGER_CONSTANT : (["0"-"9"])+ >
+  | < REAL_CONSTANT : (["0"-"9"])+ "." (["0"-"9"])* >
+  | < STRING_LITERAL : "\"" (~["\"","\n","\r"])* "\"" >
+  | < ADD_OP : "+" >
+  | < SUB_OP : "-" >
+  | < MUL_OP : "*" >
+  | < DIV_OP : "/" >
+  | < ASSIGN_OP : ":=" >
+  | < EQ_OP : "=" >
+  | < NEQ_OP : "<>" >
+  | < LT_OP : "<" >
+  | < GT_OP : ">" >
+  | < LE_OP : "<=" >
+  | < GE_OP : ">=" >
+  | < LPAREN : "(" >
+  | < RPAREN : ")" >
+  | < SEMICOLON : ";" >
+  | < COLON : ":" >
+  | < COMMA : "," >
+  | < PERIOD : "." >
+  | < RANGE_OP : ".." >
+
+//Palabras reservadas
+  | < BEGIN_KEYWORD : "begin" >
+  | < END_KEYWORD : "end" >
+  | < PROGRAM_KEYWORD : "program" >
+  | < VAR_KEYWORD : "var" >
+  | < CONST_KEYWORD : "const" >
+  | < FUNCTION_KEYWORD : "function" >
+  | < PROCEDURE_KEYWORD : "procedure" >
+  | < ARRAY_KEYWORD : "array" >
+  | < OF_KEYWORD : "of" >
+  | < IF_KEYWORD : "if" >
+  | < THEN_KEYWORD : "then" >
+  | < ELSE_KEYWORD : "else" >
+  | < WHILE_KEYWORD : "while" >
+  | < DO_KEYWORD : "do" >
+  | < FOR_KEYWORD : "for" >
+  | < TO_KEYWORD : "to" >
+  | < DOWNTO_KEYWORD : "downto" >
+  | < REPEAT_KEYWORD : "repeat" >
+  | < UNTIL_KEYWORD : "until" >
+  | < CASE_KEYWORD : "case" >
+  | < RECORD_KEYWORD : "record" >
+  | < TYPE_KEYWORD : "type" >
+  | < WITH_KEYWORD : "with" >
+  | < GOTO_KEYWORD : "goto" >
+  | < BREAK_KEYWORD : "break" >
+  | < CONTINUE_KEYWORD : "continue" >
+  | < EXIT_KEYWORD : "exit" >
+  | < OR_KEYWORD : "or" >
+  | < AND_KEYWORD : "and" >
+  | < NOT_KEYWORD : "not" >
+  | < MOD_KEYWORD : "mod" >
+  | < DIV_KEYWORD : "div" >
+}
+
+void Program() :
+{}
+{
+  <PROGRAM_KEYWORD> Identifier() <SEMICOLON> Block() <PERIOD>
+}
+
+void Block() :
+{}
+{
+  ( { ConstDeclaration() } )* { VarDeclaration() }  ( { FunctionDeclaration() | ProcedureDeclaration() } )* CompoundStatement()
+}
+
+void VarDeclaration() :
+{}
+{
+  <VAR_KEYWORD> ( VariableDeclaration() <SEMICOLON> )+
+}
+
+void ConstDeclaration() :
+{}
+{
+  <CONST_KEYWORD> ( Identifier() <ASSIGN_OP> Constant() <SEMICOLON> )+
+}
+
+void FunctionDeclaration() :
+{}
+{
+  <FUNCTION_KEYWORD> Identifier() <LPAREN> ( ParameterList() )? <RPAREN> <COLON> TypeIdentifier() <SEMICOLON> Block()
+}
+
+void ProcedureDeclaration() :
+{}
+{
+  <PROCEDURE_KEYWORD> Identifier() <LPAREN> ( ParameterList() )? <RPAREN> <SEMICOLON> Block()
+}
+
+void CompoundStatement() :
+{}
+{
+  <BEGIN_KEYWORD> ( Statement() <SEMICOLON> )* <END_KEYWORD>
+}
+
+void Statement() :
+{}
+{
+  AssignmentStatement()
+| IfStatement()
+| WhileStatement()
+| ForStatement()
+| RepeatStatement()
+| CaseStatement()
+| CompoundStatement()
+}
+
+void AssignmentStatement() :
+{}
+{
+  Identifier() <ASSIGN_OP> Expression()
+}
+
+void IfStatement() :
+{}
+{
+  <IF_KEYWORD> Expression() <THEN_KEYWORD> Statement() ( <ELSE_KEYWORD> Statement() )?
+}
+
+void WhileStatement() :
+{}
+{
+  <WHILE_KEYWORD> Expression() <DO_KEYWORD> Statement()
+}
+
+void ForStatement() :
+{}
+{
+  <FOR_KEYWORD> Identifier() <ASSIGN_OP> Expression() ( <TO_KEYWORD> | <DOWNTO_KEYWORD> ) Expression() <DO_KEYWORD> Statement()
+}
+
+void RepeatStatement() :
+{}
+{
+  <REPEAT_KEYWORD> ( Statement() <SEMICOLON> )* <UNTIL_KEYWORD> Expression()
+}
+
+void CaseStatement() :
+{}
+{
+  <CASE_KEYWORD> Expression() <OF_KEYWORD> ( CaseClause() )* ( <ELSE_KEYWORD> Statement() )? <END_KEYWORD>
+}
+
+void CaseClause() :
+{}
+{
+  Constant() <COLON> Statement() <SEMICOLON>
+}
+
+void Expression() :
+{}
+{
+  SimpleExpression() ( ( <EQ_OP> | <NEQ_OP> | <LT_OP> | <LE_OP> | <GT_OP> | <GE_OP> ) SimpleExpression() )?
+}
+
+void SimpleExpression() :
+{}
+{
+  Term() ( ( <ADD_OP> | <SUB_OP> ) Term() )*
+}
+
+void Term() :
+{}
+{
+  Factor() ( ( <MUL_OP> | <DIV_OP> ) Factor() )*
+}
+
+void Factor() :
+{}
+{
+  <INTEGER_CONSTANT>
+| <REAL_CONSTANT>
+| <STRING_LITERAL>
+| <IDENTIFIER>
+| <LPAREN> Expression() <RPAREN>
+}
