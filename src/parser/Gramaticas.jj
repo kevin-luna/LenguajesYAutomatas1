@@ -1,0 +1,309 @@
+options {
+    STATIC = false;
+    IGNORE_CASE = true;
+    BUILD_PARSER = true;
+    LOOKAHEAD = 2;
+}
+
+PARSER_BEGIN(PascalParser)
+package parser;
+public class PascalParser {}
+PARSER_END(PascalParser)
+
+SKIP : {
+    " " // Espacios en blanco
+  | "\t" // Tabuladores
+  | "\n" // Saltos de línea
+  | "\r" // Retornos de carro
+  | <COMMENT1: "{" (~["}"])* "}">
+  | <COMMENT2: "(*" (~["*"])* "*)">
+  | <COMMENT3: "//" (~["\n", "\r"])* ("\n" | "\r" | "\r\n")>
+}
+
+TOKEN : {
+    //Palabras reservadas
+       < BEGIN_KEYWORD : "begin" >
+      | < END_KEYWORD : "end" >
+      | < PROGRAM_KEYWORD : "program" >
+      | < VAR_KEYWORD : "var" >
+      | < CONST_KEYWORD : "const" >
+      | < LABEL_KEYWORD : "label" >
+      | < FUNCTION_KEYWORD : "function" >
+      | < PROCEDURE_KEYWORD : "procedure" >
+      | < ARRAY_KEYWORD : "array" >
+      | < SET_KEYWORD: "set" >
+      | < OF_KEYWORD : "of" >
+      | < IF_KEYWORD : "if" >
+      | < THEN_KEYWORD : "then" >
+      | < ELSE_KEYWORD : "else" >
+      | < WHILE_KEYWORD : "while" >
+      | < DO_KEYWORD : "do" >
+      | < FOR_KEYWORD : "for" >
+      | < TO_KEYWORD : "to" >
+      | < DOWNTO_KEYWORD : "downto" >
+      | < REPEAT_KEYWORD : "repeat" >
+      | < UNTIL_KEYWORD : "until" >
+      | < CASE_KEYWORD : "case" >
+      | < RECORD_KEYWORD : "record" >
+      | < TYPE_KEYWORD : "type" >
+      | < WITH_KEYWORD : "with" >
+      | < GOTO_KEYWORD : "goto" >
+      | < BREAK_KEYWORD : "break" >
+      | < CONTINUE_KEYWORD : "continue" >
+//      | < EXIT_KEYWORD : "exit" >
+      | < OR_KEYWORD : "or" >
+      | < AND_KEYWORD : "and" >
+      | < NOT_KEYWORD : "not" >
+      | < MOD_KEYWORD : "mod" >
+      | < DIV_KEYWORD : "div" >
+      | <INT_KEYWORD : "integer">
+      | <REAL_KEYWORD : "real" >
+      | <BOOLEAN_KEYWORD : "boolean" >
+      | <CHAR_KEYWORD : "char" >
+      | <NIL_KEYWORD : "nil" >
+      | <PACKED_KEYWORD: "packed">
+      | <IN_KEYWORD : "in">
+      | <USES_KEYWORD: "uses">
+
+
+  |  < IDENTIFIER : (["a"-"z","A"-"Z"])+ (["a"-"z","A"-"Z","0"-"9"])* >
+  | < INTEGER_CONSTANT : (["0"-"9"])+ >
+  | < REAL_CONSTANT : (["0"-"9"])+ ("E" ("+" | "-") (["0"-"9"])+  |"." (["0"-"9"])+ | "." (["0"-"9"])+ "E" ("+"|"-") (["0"-"9"])+)>
+  | < STRING_CONSTANT : "\'" (~["\'","\n","\r"])* "\'" >
+  | <CHAR_CONSTANT : "\'" (~[]) "\'" >
+  | < ADD_OP : "+" >
+  | < SUB_OP : "-" >
+  | < MUL_OP : "*" >
+  | < DIV_OP : "/" >
+  | < ASSIGN_OP : ":=" >
+  | < EQ_OP : "=" >
+  | < NEQ_OP : "<>" >
+  | < LT_OP : "<" >
+  | < GT_OP : ">" >
+  | < LE_OP : "<=" >
+  | < GE_OP : ">=" >
+  | < LPAREN : "(" >
+  | < RPAREN : ")" >
+  | < LBRACKET : "[">
+  | < RBRACKET : "]">
+  | < SEMICOLON : ";" >
+  | < COLON : ":" >
+  | < COMMA : "," >
+  | < PERIOD : "." >
+  | < RANGE_OP : ".." >
+}
+
+void Program() :
+{}
+{
+  <PROGRAM_KEYWORD> <IDENTIFIER> (<LPAREN> <IDENTIFIER> (<COMMA> <IDENTIFIER>)* <RPAREN> )?  <SEMICOLON> (UseStatement())* (Block())+ <PERIOD>
+}
+
+void UseStatement():
+{}
+{
+<USES_KEYWORD> <IDENTIFIER> <SEMICOLON>
+}
+
+void Block():
+{}
+{
+    CodeBlock() | ConstBlock()  | VarBlock() | Procedure() | Function()
+}
+
+void CodeBlock() :
+{}
+{
+  <BEGIN_KEYWORD>
+  (Statement())*
+  <END_KEYWORD>
+}
+
+void Statement() :
+{}
+{
+AssignmentStatement() | ProcedureCall() <SEMICOLON> | IfStatement() | CaseStatement() | RepeatStatement() | WhileStatement() | ForStatement()
+}
+
+void TypeIdentifier():
+{}
+{
+(<INT_KEYWORD> | <REAL_KEYWORD> | <CHAR_KEYWORD> | <BOOLEAN_KEYWORD> | <IDENTIFIER>) (<LBRACKET> UnsignedNumber() (<COMMA> UnsignedNumber())* <RBRACKET>)?
+}
+
+void SimpleType():
+{}
+{
+    <IDENTIFIER>| TypeIdentifier() | <LPAREN> <IDENTIFIER> (<COMMA> <IDENTIFIER> )* <RPAREN> | Constant() (<RANGE_OP> Constant())?
+}
+
+void FieldList():
+{}
+{
+ ( (<IDENTIFIER> (<COMMA> <IDENTIFIER>)* <COLON> Type() <SEMICOLON>)+)?
+}
+
+void Type():
+{}
+{
+    <ARRAY_KEYWORD> <LBRACKET> SimpleType() <RBRACKET> <OF_KEYWORD> Type() | <RECORD_KEYWORD> FieldList() <END_KEYWORD> <SEMICOLON> | SimpleType()
+}
+
+void FunctionCall():
+{}
+{
+<IDENTIFIER> ( <LPAREN> Argument() ( <COMMA> Argument() )* <RPAREN>)?
+}
+
+void ProcedureCall():
+{}
+{
+<IDENTIFIER> ( <LPAREN> Argument() ( <COMMA> Argument() )* <RPAREN>)?
+}
+
+void Argument():
+{}
+{
+Expression() | Constant()
+}
+
+void Constant():
+{}
+{
+  ((<ADD_OP> | <SUB_OP>)? (<IDENTIFIER> | UnsignedNumber())) | <CHAR_CONSTANT> | <STRING_CONSTANT>
+}
+
+
+
+void Expression():
+{}
+{
+ SimpleExpression() ((<EQ_OP> | <LT_OP> | <GT_OP> | <NEQ_OP> | <LE_OP> | <GE_OP> | <IN_KEYWORD>) SimpleExpression() )?
+}
+
+void SimpleExpression():
+{}
+{
+(<ADD_OP> | <SUB_OP>)? Term() ( (<ADD_OP> | <SUB_OP> | <OR_KEYWORD> | <AND_KEYWORD> | <NOT_KEYWORD> ) Term())*
+}
+
+
+void Term():
+{}
+{
+Factor()  ((<MUL_OP> | <DIV_OP> | <MOD_KEYWORD> | <AND_KEYWORD>) Factor() )*
+}
+
+void Factor():
+{}
+{
+ FunctionCall() | <IDENTIFIER>  | Constant() | Variable() |UnsignedConstant() | <LPAREN> Expression() <RPAREN> | <NOT_KEYWORD> Factor() | <LBRACKET> Expression() (<RANGE_OP> Expression())? (<COMMA> Expression() (<RANGE_OP> Expression())?)* <RBRACKET>
+}
+
+void UnsignedConstant():
+{}
+{
+    <IDENTIFIER> | UnsignedNumber() | <NIL_KEYWORD> | <CHAR_CONSTANT>
+}
+
+void UnsignedNumber():
+{}
+{
+    <INTEGER_CONSTANT> | <REAL_CONSTANT>
+}
+
+
+void Variable():
+{}
+{
+<IDENTIFIER> ( <LBRACKET> Expression() ( <COMMA> Expression())* <RBRACKET> | <PERIOD> <IDENTIFIER> )*
+}
+
+void ConstBlock() :
+{}
+{
+  <CONST_KEYWORD> ( <IDENTIFIER> <ASSIGN_OP> Constant() <SEMICOLON> )+
+}
+
+void VarBlock() :
+{}
+{
+  <VAR_KEYWORD> (<IDENTIFIER> (<COMMA> <IDENTIFIER>)* <COLON> Type() <SEMICOLON>)+
+}
+
+void ParamDefinition():
+{}
+{
+<IDENTIFIER> (<COMMA> <IDENTIFIER> )* <COLON> Type()
+| <FUNCTION_KEYWORD> <IDENTIFIER> (<COMMA> <IDENTIFIER>)* <COLON> Type() <SEMICOLON>
+| <VAR_KEYWORD> <IDENTIFIER> (<COMMA> <IDENTIFIER>)* <COLON> Type()
+| <PROCEDURE_KEYWORD> <IDENTIFIER> (<COMMA> <IDENTIFIER>)*
+}
+
+void ParamList() :
+{}
+{
+(<LPAREN> ParamDefinition() (<SEMICOLON> ParamDefinition() )* <RPAREN> )?
+}
+
+void Procedure() :
+{}
+{
+ <PROCEDURE_KEYWORD> <IDENTIFIER> ParamList() <SEMICOLON> ( ConstBlock() | VarBlock() )* Block() <SEMICOLON>
+}
+
+void Function() :
+{}
+{
+ <FUNCTION_KEYWORD> <IDENTIFIER> ParamList() <COLON> Type() <SEMICOLON> ( ConstBlock() | VarBlock() )* Block() <SEMICOLON>
+}
+
+
+void AssignmentStatement():
+{}
+{
+(Variable() | <IDENTIFIER> ) <ASSIGN_OP> Expression() <SEMICOLON>
+}
+
+
+
+
+
+void IfStatement():
+{}
+{
+<IF_KEYWORD> Expression() <THEN_KEYWORD> (Statement() (ElseStatement())? | CodeBlock() ( <SEMICOLON> | (ElseStatement())? ))
+}
+
+void ElseStatement():
+{}
+{
+    <ELSE_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )
+}
+
+void CaseStatement():
+{}
+{
+<CASE_KEYWORD> Expression() <OF_KEYWORD> (Constant() (<COMMA> Constant() )* <COLON> (Statement() | CodeBlock() <SEMICOLON> ))+ <ELSE_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )<END_KEYWORD> <SEMICOLON>
+}
+
+void WhileStatement():
+{}
+{
+<WHILE_KEYWORD> Expression() <DO_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )
+}
+
+void RepeatStatement():
+{}
+{
+<REPEAT_KEYWORD> (Statement())* <UNTIL_KEYWORD> Expression() <SEMICOLON>
+}
+
+void ForStatement():
+{}
+{
+<FOR_KEYWORD> <IDENTIFIER> <ASSIGN_OP> Expression() (<DOWNTO_KEYWORD> | <TO_KEYWORD> ) Expression() <DO_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )
+}
+
+
+
