@@ -27,11 +27,11 @@ TOKEN : {
       | < PROGRAM_KEYWORD : "program" >
       | < VAR_KEYWORD : "var" >
       | < CONST_KEYWORD : "const" >
-      | < LABEL_KEYWORD : "label" >
-      | < FUNCTION_KEYWORD : "function" >
-      | < PROCEDURE_KEYWORD : "procedure" >
+      //| < LABEL_KEYWORD : "label" >
+      //| < FUNCTION_KEYWORD : "function" >
+      //| < PROCEDURE_KEYWORD : "procedure" >
       | < ARRAY_KEYWORD : "array" >
-      | < SET_KEYWORD: "set" >
+      //| < SET_KEYWORD: "set" >
       | < OF_KEYWORD : "of" >
       | < IF_KEYWORD : "if" >
       | < THEN_KEYWORD : "then" >
@@ -44,10 +44,10 @@ TOKEN : {
       | < REPEAT_KEYWORD : "repeat" >
       | < UNTIL_KEYWORD : "until" >
       | < CASE_KEYWORD : "case" >
-      | < RECORD_KEYWORD : "record" >
-      | < TYPE_KEYWORD : "type" >
-      | < WITH_KEYWORD : "with" >
-      | < GOTO_KEYWORD : "goto" >
+      //| < RECORD_KEYWORD : "record" >
+      //| < TYPE_KEYWORD : "type" >
+      //| < WITH_KEYWORD : "with" >
+      //| < GOTO_KEYWORD : "goto" >
       | < BREAK_KEYWORD : "break" >
       | < CONTINUE_KEYWORD : "continue" >
 //      | < EXIT_KEYWORD : "exit" >
@@ -60,10 +60,16 @@ TOKEN : {
       | <REAL_KEYWORD : "real" >
       | <BOOLEAN_KEYWORD : "boolean" >
       | <CHAR_KEYWORD : "char" >
+      | <STRING_KEYWORD  : "string">
       | <NIL_KEYWORD : "nil" >
-      | <PACKED_KEYWORD: "packed">
-      | <IN_KEYWORD : "in">
-      | <USES_KEYWORD: "uses">
+      //La palabra reservada packed sirve para optimizar el uso de memoria en arreglos y registros eliminando bytes de relleno
+      //| <PACKED_KEYWORD: "packed">
+      //| <IN_KEYWORD : "in">
+      //| <USES_KEYWORD: "uses">
+      | <WRITELN_KEYWORD : "writeln">
+      | <WRITE_KEYWORD : "write">
+      | <READ_KEYWORD : "read">
+      | <READLN_KEYWORD : "readln">
 
 
   |  < IDENTIFIER : (["a"-"z","A"-"Z"])+ (["a"-"z","A"-"Z","0"-"9"])* >
@@ -96,19 +102,24 @@ TOKEN : {
 void Program() :
 {}
 {
-  <PROGRAM_KEYWORD> <IDENTIFIER> (<LPAREN> <IDENTIFIER> (<COMMA> <IDENTIFIER>)* <RPAREN> )?  <SEMICOLON> (UseStatement())* (Block())+ <PERIOD>
+  //La gramática comentada acepta la palabra reservada "uses" para importar librerías.
+  //<PROGRAM_KEYWORD> <IDENTIFIER> (<LPAREN> <IDENTIFIER> (<COMMA> <IDENTIFIER>)* <RPAREN> )?  <SEMICOLON> (UseStatement())* (Block())+ <PERIOD>
+  <PROGRAM_KEYWORD> <IDENTIFIER> (<LPAREN> <IDENTIFIER> (<COMMA> <IDENTIFIER>)* <RPAREN> )?  <SEMICOLON> (Block())+ <PERIOD>
 }
 
-void UseStatement():
-{}
-{
-<USES_KEYWORD> <IDENTIFIER> <SEMICOLON>
-}
+//void UseStatement():
+//{}
+//{
+//    //La gramatica comentada permite el uso de la clausula uses para importar librerias.
+//<USES_KEYWORD> <IDENTIFIER> <SEMICOLON>
+//}
 
 void Block():
 {}
 {
-    CodeBlock() | ConstBlock()  | VarBlock() | Procedure() | Function()
+    //La gramatica comentada soporta la creacion de procedimientos y funciones
+    //CodeBlock() | ConstBlock()  | VarBlock() | Procedure() | Function()
+    CodeBlock() | ConstBlock()  | VarBlock()
 }
 
 void CodeBlock() :
@@ -122,82 +133,88 @@ void CodeBlock() :
 void Statement() :
 {}
 {
-AssignmentStatement() | ProcedureCall() <SEMICOLON> | IfStatement() | CaseStatement() | RepeatStatement() | WhileStatement() | ForStatement()
+    //La gramática comentada acepta la llamada a procedimientos y funciones
+    //AssignmentStatement() | ProcedureCall() <SEMICOLON> | FunctionCall() <SEMICOLON> | IfStatement() | CaseStatement() | RepeatStatement() | WhileStatement() | ForStatement()
+    AssignmentStatement() | IfStatement() | CaseStatement() | RepeatStatement() | WhileStatement() | ForStatement()
 }
 
 void TypeIdentifier():
 {}
 {
-(<INT_KEYWORD> | <REAL_KEYWORD> | <CHAR_KEYWORD> | <BOOLEAN_KEYWORD> | <IDENTIFIER>) (<LBRACKET> UnsignedNumber() (<COMMA> UnsignedNumber())* <RBRACKET>)?
+    //La gramatica comentada soporta el uso de tipos definidos por el usuario
+    //(<INT_KEYWORD> | <REAL_KEYWORD> | <CHAR_KEYWORD> | <BOOLEAN_KEYWORD> | <IDENTIFIER>) (<LBRACKET> UnsignedNumber() (<COMMA> UnsignedNumber())* <RBRACKET>)?
+    (<INT_KEYWORD> | <REAL_KEYWORD> | <CHAR_KEYWORD> | <BOOLEAN_KEYWORD> | <STRING_KEYWORD> )
 }
 
-void SimpleType():
-{}
-{
-    <IDENTIFIER>| TypeIdentifier() | <LPAREN> <IDENTIFIER> (<COMMA> <IDENTIFIER> )* <RPAREN> | Constant() (<RANGE_OP> Constant())?
-}
+//void SimpleType():
+//{}
+//{
+//    <IDENTIFIER>| TypeIdentifier() | <LPAREN> <IDENTIFIER> (<COMMA> <IDENTIFIER> )* <RPAREN> | Constant() (<RANGE_OP> Constant())?
+//}
 
-void FieldList():
-{}
-{
- ( (<IDENTIFIER> (<COMMA> <IDENTIFIER>)* <COLON> Type() <SEMICOLON>)+)?
-}
+//void FieldList():
+//{}
+//{
+// ( (<IDENTIFIER> (<COMMA> <IDENTIFIER>)* <COLON> Type() <SEMICOLON>)+)?
+//}
 
-void Type():
-{}
-{
-    <ARRAY_KEYWORD> <LBRACKET> SimpleType() <RBRACKET> <OF_KEYWORD> Type() | <RECORD_KEYWORD> FieldList() <END_KEYWORD> <SEMICOLON> | SimpleType()
-}
+//void Type():
+//{}
+//{
+//    <ARRAY_KEYWORD> <LBRACKET> SimpleType() <RBRACKET> <OF_KEYWORD> Type() | <RECORD_KEYWORD> FieldList() <END_KEYWORD> <SEMICOLON> | SimpleType()
+//}
 
-void FunctionCall():
-{}
-{
-<IDENTIFIER> ( <LPAREN> Argument() ( <COMMA> Argument() )* <RPAREN>)?
-}
+//void FunctionCall():
+//{}
+//{
+//<IDENTIFIER> ( <LPAREN> Argument() ( <COMMA> Argument() )* <RPAREN>)?
+//}
 
-void ProcedureCall():
-{}
-{
-<IDENTIFIER> ( <LPAREN> Argument() ( <COMMA> Argument() )* <RPAREN>)?
-}
+//void ProcedureCall():
+//{}
+//{
+//<IDENTIFIER> ( <LPAREN> Argument() ( <COMMA> Argument() )* <RPAREN>)?
+//}
 
-void Argument():
-{}
-{
-Expression() | Constant()
-}
+//void Argument():
+//{}
+//{
+//    Expression() | Constant()
+//}
 
 void Constant():
 {}
 {
-  ((<ADD_OP> | <SUB_OP>)? (<IDENTIFIER> | UnsignedNumber())) | <CHAR_CONSTANT> | <STRING_CONSTANT>
+    ((<ADD_OP> | <SUB_OP>)? (<IDENTIFIER> | UnsignedNumber())) | <CHAR_CONSTANT> | <STRING_CONSTANT>
 }
-
-
 
 void Expression():
 {}
 {
- SimpleExpression() ((<EQ_OP> | <LT_OP> | <GT_OP> | <NEQ_OP> | <LE_OP> | <GE_OP> | <IN_KEYWORD>) SimpleExpression() )?
+    //La gramatica comentada soporta el uso de la palabra reservada IN para trabajar con conjuntos.
+    //SimpleExpression() ((<EQ_OP> | <LT_OP> | <GT_OP> | <NEQ_OP> | <LE_OP> | <GE_OP> | <IN_KEYWORD>) SimpleExpression() )?
+    SimpleExpression() ((<EQ_OP> | <LT_OP> | <GT_OP> | <NEQ_OP> | <LE_OP> | <GE_OP>) SimpleExpression() )?
 }
 
 void SimpleExpression():
 {}
 {
-(<ADD_OP> | <SUB_OP>)? Term() ( (<ADD_OP> | <SUB_OP> | <OR_KEYWORD> | <AND_KEYWORD> | <NOT_KEYWORD> ) Term())*
+    (<ADD_OP> | <SUB_OP>)? Term() ( (<ADD_OP> | <SUB_OP> | <OR_KEYWORD> | <AND_KEYWORD> | <NOT_KEYWORD> ) Term())*
 }
 
 
 void Term():
 {}
 {
-Factor()  ((<MUL_OP> | <DIV_OP> | <MOD_KEYWORD> | <AND_KEYWORD>) Factor() )*
+    Factor()  ((<MUL_OP> | <DIV_OP> | <MOD_KEYWORD> | <AND_KEYWORD>) Factor() )*
 }
 
 void Factor():
 {}
 {
- FunctionCall() | <IDENTIFIER>  | Constant() | Variable() |UnsignedConstant() | <LPAREN> Expression() <RPAREN> | <NOT_KEYWORD> Factor() | <LBRACKET> Expression() (<RANGE_OP> Expression())? (<COMMA> Expression() (<RANGE_OP> Expression())?)* <RBRACKET>
+    //La gramatica comentada acepta las llamadas a funciones como un factor para una expresion
+    //FunctionCall() | <IDENTIFIER>  | Constant() | Variable() | UnsignedConstant() | <LPAREN> Expression() <RPAREN> | <NOT_KEYWORD> Factor() | <LBRACKET> Expression() (<RANGE_OP> Expression())? (<COMMA> Expression() (<RANGE_OP> Expression())?)* <RBRACKET>
+    <IDENTIFIER>  | Constant() | Variable() | UnsignedConstant() | <LPAREN> Expression() <RPAREN> | <NOT_KEYWORD> Factor() | <LBRACKET> Expression() (<RANGE_OP> Expression())? (<COMMA> Expression() (<RANGE_OP> Expression())?)* <RBRACKET>
 }
 
 void UnsignedConstant():
@@ -212,67 +229,87 @@ void UnsignedNumber():
     <INTEGER_CONSTANT> | <REAL_CONSTANT>
 }
 
+void ArrayReference():
+{}
+{
+    <IDENTIFIER> <LBRACKET> Expression() <RBRACKET>
+}
+
+//void RecordReference():
+//{}
+//{
+//    //Esta gramatica soporta la referencia hacia tipos registro.
+//    <IDENTIFIER> <PERIOD> (<IDENTIFIER> | ArrayReference() )
+//}
 
 void Variable():
 {}
 {
-<IDENTIFIER> ( <LBRACKET> Expression() ( <COMMA> Expression())* <RBRACKET> | <PERIOD> <IDENTIFIER> )*
+    <IDENTIFIER> | ArrayReference()
 }
 
 void ConstBlock() :
 {}
 {
-  <CONST_KEYWORD> ( <IDENTIFIER> <ASSIGN_OP> Constant() <SEMICOLON> )+
+    <CONST_KEYWORD> ( <IDENTIFIER> <EQ_OP> Constant() <SEMICOLON> )+
+}
+
+void VariableDeclaration():
+{}
+{
+    <IDENTIFIER> (<COMMA> <IDENTIFIER> )* <COLON> TypeIdentifier() <SEMICOLON>
+}
+
+void ArrayDeclaration():
+{}
+{
+    <IDENTIFIER> <COLON> <ARRAY_KEYWORD><LBRACKET> <INTEGER_CONSTANT> <RBRACKET> <OF_KEYWORD> TypeIdentifier() <SEMICOLON>
 }
 
 void VarBlock() :
 {}
 {
-  <VAR_KEYWORD> (<IDENTIFIER> (<COMMA> <IDENTIFIER>)* <COLON> Type() <SEMICOLON>)+
+    <VAR_KEYWORD> (VariableDeclaration() | ArrayDeclaration())*
 }
 
-void ParamDefinition():
-{}
-{
-<IDENTIFIER> (<COMMA> <IDENTIFIER> )* <COLON> Type()
-| <FUNCTION_KEYWORD> <IDENTIFIER> (<COMMA> <IDENTIFIER>)* <COLON> Type() <SEMICOLON>
-| <VAR_KEYWORD> <IDENTIFIER> (<COMMA> <IDENTIFIER>)* <COLON> Type()
-| <PROCEDURE_KEYWORD> <IDENTIFIER> (<COMMA> <IDENTIFIER>)*
-}
+//void ParamDefinition():
+//{}
+//{
+//<IDENTIFIER> (<COMMA> <IDENTIFIER> )* <COLON> Type()
+//| <FUNCTION_KEYWORD> <IDENTIFIER> (<COMMA> <IDENTIFIER>)* <COLON> Type() <SEMICOLON>
+//| <VAR_KEYWORD> <IDENTIFIER> (<COMMA> <IDENTIFIER>)* <COLON> Type()
+//| <PROCEDURE_KEYWORD> <IDENTIFIER> (<COMMA> <IDENTIFIER>)*
+//}
 
-void ParamList() :
-{}
-{
-(<LPAREN> ParamDefinition() (<SEMICOLON> ParamDefinition() )* <RPAREN> )?
-}
+//void ParamList() :
+//{}
+//{
+//(<LPAREN> ParamDefinition() (<SEMICOLON> ParamDefinition() )* <RPAREN> )?
+//}
 
-void Procedure() :
-{}
-{
- <PROCEDURE_KEYWORD> <IDENTIFIER> ParamList() <SEMICOLON> ( ConstBlock() | VarBlock() )* Block() <SEMICOLON>
-}
+//void Procedure() :
+//{}
+//{
+// <PROCEDURE_KEYWORD> <IDENTIFIER> ParamList() <SEMICOLON> ( ConstBlock() | VarBlock() )* Block() <SEMICOLON>
+//}
 
-void Function() :
-{}
-{
- <FUNCTION_KEYWORD> <IDENTIFIER> ParamList() <COLON> Type() <SEMICOLON> ( ConstBlock() | VarBlock() )* Block() <SEMICOLON>
-}
+//void Function() :
+//{}
+//{
+// <FUNCTION_KEYWORD> <IDENTIFIER> ParamList() <COLON> Type() <SEMICOLON> ( ConstBlock() | VarBlock() )* Block() <SEMICOLON>
+//}
 
 
 void AssignmentStatement():
 {}
 {
-(Variable() | <IDENTIFIER> ) <ASSIGN_OP> Expression() <SEMICOLON>
+    (Variable() | <IDENTIFIER> ) <ASSIGN_OP> Expression() <SEMICOLON>
 }
-
-
-
-
 
 void IfStatement():
 {}
 {
-<IF_KEYWORD> Expression() <THEN_KEYWORD> (Statement() (ElseStatement())? | CodeBlock() ( <SEMICOLON> | (ElseStatement())? ))
+    <IF_KEYWORD> Expression() <THEN_KEYWORD> (Statement() (ElseStatement())? | CodeBlock() ( <SEMICOLON> | (ElseStatement())? ))
 }
 
 void ElseStatement():
@@ -284,26 +321,47 @@ void ElseStatement():
 void CaseStatement():
 {}
 {
-<CASE_KEYWORD> Expression() <OF_KEYWORD> (Constant() (<COMMA> Constant() )* <COLON> (Statement() | CodeBlock() <SEMICOLON> ))+ <ELSE_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )<END_KEYWORD> <SEMICOLON>
+    <CASE_KEYWORD> Expression() <OF_KEYWORD> (Constant() (<COMMA> Constant() )* <COLON> (Statement() | CodeBlock() <SEMICOLON> ))+ <ELSE_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )<END_KEYWORD> <SEMICOLON>
 }
 
 void WhileStatement():
 {}
 {
-<WHILE_KEYWORD> Expression() <DO_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )
+    <WHILE_KEYWORD> Expression() <DO_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )
 }
 
 void RepeatStatement():
 {}
 {
-<REPEAT_KEYWORD> (Statement())* <UNTIL_KEYWORD> Expression() <SEMICOLON>
+    <REPEAT_KEYWORD> (Statement())* <UNTIL_KEYWORD> Expression() <SEMICOLON>
 }
 
 void ForStatement():
 {}
 {
-<FOR_KEYWORD> <IDENTIFIER> <ASSIGN_OP> Expression() (<DOWNTO_KEYWORD> | <TO_KEYWORD> ) Expression() <DO_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )
+    <FOR_KEYWORD> <IDENTIFIER> <ASSIGN_OP> Expression() (<DOWNTO_KEYWORD> | <TO_KEYWORD> ) Expression() <DO_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )
 }
 
+void WriteCall():
+{}
+{
+    <WRITE_KEYWORD> (<LPAREN> ( (Expression() )? | Expression() (<COMMA> Expression() )* ) <RPAREN>)? <SEMICOLON>
+}
 
+void WritelnCall():
+{}
+{
+    <WRITELN_KEYWORD> (<LPAREN> ( (Expression() )? | Expression() (<COMMA> Expression() )* ) <RPAREN>)? <SEMICOLON>
+}
 
+void ReadCall():
+{}
+{
+    <READ_KEYWORD> (<LPAREN> ( (Expression() )? | Expression() (<COMMA> Expression() )* ) <RPAREN>)? <SEMICOLON>
+}
+
+void ReadlnCall():
+{}
+{
+    <READ_KEYWORD> (<LPAREN> ( (Expression() )? | Expression() (<COMMA> Expression() )* ) <RPAREN>)? <SEMICOLON>
+}
