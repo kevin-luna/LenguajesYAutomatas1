@@ -135,7 +135,7 @@ void Statement() :
 {
     //La gramática comentada acepta la llamada a procedimientos y funciones
     //AssignmentStatement() | ProcedureCall() <SEMICOLON> | FunctionCall() <SEMICOLON> | IfStatement() | CaseStatement() | RepeatStatement() | WhileStatement() | ForStatement()
-    AssignmentStatement() | IfStatement() | CaseStatement() | RepeatStatement() | WhileStatement() | ForStatement()
+    AssignmentStatement() | IfStatement() | CaseStatement() | RepeatStatement() | WhileStatement() | ForStatement() | WriteCall() | WritelnCall() | ReadCall() | ReadlnCall()
 }
 
 void TypeIdentifier():
@@ -143,7 +143,7 @@ void TypeIdentifier():
 {
     //La gramatica comentada soporta el uso de tipos definidos por el usuario
     //(<INT_KEYWORD> | <REAL_KEYWORD> | <CHAR_KEYWORD> | <BOOLEAN_KEYWORD> | <IDENTIFIER>) (<LBRACKET> UnsignedNumber() (<COMMA> UnsignedNumber())* <RBRACKET>)?
-    (<INT_KEYWORD> | <REAL_KEYWORD> | <CHAR_KEYWORD> | <BOOLEAN_KEYWORD> | <STRING_KEYWORD> )
+    <INT_KEYWORD> | <REAL_KEYWORD> | <CHAR_KEYWORD> | <BOOLEAN_KEYWORD> | <STRING_KEYWORD>
 }
 
 //void SimpleType():
