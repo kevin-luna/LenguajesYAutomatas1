@@ -7,7 +7,11 @@ options {
 
 PARSER_BEGIN(PascalParser)
 package parser;
-public class PascalParser {}
+public class PascalParser {
+    public static void main(String[] args){
+
+    }
+}
 PARSER_END(PascalParser)
 
 SKIP : {
@@ -251,7 +255,7 @@ void Variable():
 void ConstBlock() :
 {}
 {
-    <CONST_KEYWORD> ( <IDENTIFIER> <EQ_OP> Constant() <SEMICOLON> )+
+    <CONST_KEYWORD> ( <IDENTIFIER> <COLON> TypeIdentifier() <EQ_OP> Constant() <SEMICOLON> )+
 }
 
 void VariableDeclaration():
