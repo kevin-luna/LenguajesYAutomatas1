@@ -1,6 +1,6 @@
 package parser.ast;
 
-public class CaseStatement extends AST{
+public class CaseStatement extends Statement{
     @Override
     public void traverse() {
 

@@ -1,6 +1,6 @@
 package parser.ast;
 
-public class IfStatement extends AST{
+public class IfStatement extends Statement{
     @Override
     public void traverse() {
 

@@ -1,6 +1,6 @@
 package parser.ast;
 
-public class RepeatStatement extends AST{
+public class RepeatStatement extends Statement{
     @Override
     public void traverse() {
 

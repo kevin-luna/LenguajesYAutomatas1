@@ -1,6 +1,6 @@
 package parser.ast;
 
-public class ForStatement extends AST{
+public class ForStatement extends Statement{
     @Override
     public void traverse() {
 

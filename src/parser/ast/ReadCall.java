@@ -1,6 +1,6 @@
 package parser.ast;
 
-public class ReadCall extends AST{
+public class ReadCall extends Statement{
     @Override
     public void traverse() {
 
