@@ -8,9 +8,6 @@ options {
 PARSER_BEGIN(PascalParser)
 package parser;
 public class PascalParser {
-    public static void main(String[] args){
-
-    }
 }
 PARSER_END(PascalParser)
 
