@@ -132,7 +132,7 @@ void Block():
 void VarBlock() :
 {}
 {
-    <VAR_KEYWORD> (VariableDeclaration() | ArrayDeclaration())*
+    <VAR_KEYWORD> (VariableDeclaration())*
 }
 
 void ConstBlock() :
@@ -267,13 +267,7 @@ void Variable():
 void VariableDeclaration():
 {}
 {
-    <IDENTIFIER> (<COMMA> <IDENTIFIER> )* <COLON> TypeIdentifier() <SEMICOLON>
-}
-
-void ArrayDeclaration():
-{}
-{
-    <IDENTIFIER> <COLON> <ARRAY_KEYWORD><LBRACKET> <INTEGER_CONSTANT> <RBRACKET> <OF_KEYWORD> TypeIdentifier() <SEMICOLON>
+    <IDENTIFIER>  ((<COMMA> <IDENTIFIER> )* <COLON>| <COLON> <ARRAY_KEYWORD><LBRACKET> <INTEGER_CONSTANT> <RBRACKET> <OF_KEYWORD> )  TypeIdentifier() <SEMICOLON>
 }
 
 //void ParamDefinition():
