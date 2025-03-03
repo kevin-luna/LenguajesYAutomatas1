@@ -8,19 +8,19 @@ public class SymbolTable {
         this.symbolTable = new HashMap<>();
     }
 
-    boolean lookSymbol(String symbol) {
+    public boolean lookSymbol(String symbol) {
         return symbolTable.containsKey(symbol);
     }
 
-    SymbolEntry getSymbol(String symbol){
+    public SymbolEntry getSymbol(String symbol){
         return symbolTable.get(symbol);
     }
 
-    void addSymbol(SymbolEntry symbol){
+    public void addSymbol(SymbolEntry symbol){
         symbolTable.put(symbol.getName(), symbol);
     }
 
-    void removeSymbol(SymbolEntry symbol){
+    public void removeSymbol(SymbolEntry symbol){
         symbolTable.remove(symbol.getName());
     }
 

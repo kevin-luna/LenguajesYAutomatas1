@@ -8,8 +8,13 @@ options {
 
 PARSER_BEGIN(PascalParser)
 package parser;
+import java.util.ArrayList;
+import parser.ast.*;
 public class PascalParser {
+    private SymbolTable symbolTable = new SymbolTable();
     private ErrorLog errorLog = new ErrorLog();
+    private SemanticStack semanticStack = new SemanticStack();
+    private SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(symbolTable,semanticStack,errorLog);
 
     public void printErrors(){
         errorLog.printLog();
@@ -106,12 +111,22 @@ TOKEN : {
   | < RANGE_OP : ".." >
 }
 
-void Program() :
-{}
+Program Program() :
+{
+    this.semanticStack.pushBlock(BlockType.PROGRAM_BLOCK);
+    Token identifier = null;
+    ConstBlock constBlock = null;
+    VarBlock varBlock = null;
+    CodeBlock codeBlock = null;
+}
 {
   //La gramática comentada acepta la palabra reservada "uses" para importar librerías.
   //<PROGRAM_KEYWORD> <IDENTIFIER> (<LPAREN> <IDENTIFIER> (<COMMA> <IDENTIFIER>)* <RPAREN> )?  <SEMICOLON> (UseStatement())* (Block())+ <PERIOD>
-  <PROGRAM_KEYWORD> <IDENTIFIER>  <SEMICOLON> (VarBlock() | ConstBlock())+ CodeBlock() <PERIOD>
+  <PROGRAM_KEYWORD> identifier=<IDENTIFIER>  <SEMICOLON> (VarBlock() | ConstBlock())+ CodeBlock() <PERIOD>
+
+  {this.semanticStack.popBlock();
+    return new Program(identifier.image, varBlock, constBlock, codeBlock);
+}
 }
 
 //void UseStatement():
@@ -129,16 +144,46 @@ void Block():
     CodeBlock() | ConstBlock()  | VarBlock()
 }
 
-void VarBlock() :
-{}
+VarBlock VarBlock() :
 {
-    <VAR_KEYWORD> (VariableDeclaration())*
+    this.semanticStack.pushBlock(BlockType.VAR_BLOCK);
+    ArrayList<VariableDeclaration> variables= null;
+}
+{
+    <VAR_KEYWORD> (variables=VariableDeclaration())*
+
+    {
+        this.semanticStack.popBlock();
+
+        return new VarBlock(variables);
+    }
 }
 
-void ConstBlock() :
-{}
+ConstBlock ConstBlock() :
 {
-    <CONST_KEYWORD> ( <IDENTIFIER> <COLON> TypeIdentifier() <EQ_OP> Constant() <SEMICOLON> )+
+     semanticStack.pushBlock(BlockType.CONST_BLOCK);
+    Token identifier=null,typeIdentifier=null,value=null;
+     String constName = "";
+     ArrayList<ConstDeclaration> constants = new ArrayList();
+}
+{
+    <CONST_KEYWORD> ( identifier=<IDENTIFIER> <COLON> typeIdentifier=TypeIdentifier() <EQ_OP> value=Constant() <SEMICOLON> )*//Hay que ver como obtener el valor de la constante
+    {
+        SymbolEntry newConstant = new SymbolEntry(
+                identifier.image,
+                value,
+                identifier.beginLine,
+                SymbolType.CONSTANT,
+                DataTypes.getDataType(typeIdentifier.image),
+                1,
+                0
+        );
+        semanticAnalyzer.checkConstantRedefinition(newConstant);
+    }
+    {
+    semanticStack.popBlock();
+    return new ConstBlock(constants);
+}
 }
 
 void CodeBlock() :
@@ -157,12 +202,17 @@ void Statement() :
     AssignmentStatement() | ForStatement() | IfStatement() | ReadCall() | ReadlnCall() | WhileStatement() | WriteCall() | WritelnCall()
 }
 
-void TypeIdentifier():
-{}
+Token TypeIdentifier():
+{
+    Token type=null;
+ }
 {
     //La gramatica comentada soporta el uso de tipos definidos por el usuario
     //(<INT_KEYWORD> | <REAL_KEYWORD> | <CHAR_KEYWORD> | <BOOLEAN_KEYWORD> | <IDENTIFIER>) (<LBRACKET> UnsignedNumber() (<COMMA> UnsignedNumber())* <RBRACKET>)?
-    <INT_KEYWORD> | <REAL_KEYWORD> | <CHAR_KEYWORD> | <BOOLEAN_KEYWORD> | <STRING_KEYWORD>
+    (type=<INT_KEYWORD> | type=<REAL_KEYWORD> | type=<CHAR_KEYWORD> | type=<BOOLEAN_KEYWORD> | type=<STRING_KEYWORD>)
+
+
+    {return type;}
 }
 
 //void SimpleType():
@@ -231,10 +281,15 @@ void Factor():
     Constant() | Variable() | UnsignedConstant() | <LPAREN> Expression() <RPAREN> | <NOT_KEYWORD> Factor() | <LBRACKET> Expression() (<RANGE_OP> Expression())? (<COMMA> Expression() (<RANGE_OP> Expression())?)* <RBRACKET>
 }
 
-void Constant():
-{}
+Token Constant():
 {
-    ((<ADD_OP> | <SUB_OP>)? (<IDENTIFIER> | UnsignedNumber())) | <CHAR_CONSTANT> | <STRING_CONSTANT>
+    Token sign=null;
+    Token value=null;
+ }
+{
+    (((sign=<ADD_OP> | sign=<SUB_OP>)? (<IDENTIFIER> | UnsignedNumber())) | <CHAR_CONSTANT> | <STRING_CONSTANT>)
+
+    {return value;}
 }
 
 
@@ -244,10 +299,14 @@ void UnsignedConstant():
     <IDENTIFIER> | UnsignedNumber() | <NIL_KEYWORD> | <CHAR_CONSTANT> | <STRING_CONSTANT>
 }
 
-void UnsignedNumber():
-{}
+Token UnsignedNumber():
 {
-    <INTEGER_CONSTANT> | <REAL_CONSTANT>
+        Token literal;
+}
+{
+    literal=<INTEGER_CONSTANT> | literal=<REAL_CONSTANT>
+
+    {return literal;}
 }
 
 //void RecordReference():
@@ -263,11 +322,65 @@ void Variable():
     <IDENTIFIER> (<LBRACKET> Expression() <RBRACKET>)?
 }
 
-
-void VariableDeclaration():
-{}
+/*
+Las acciones semanticas para la definicion de variables realiza
+la comprobacion de la redeclaracion de identificadores.
+ */
+ArrayList<VariableDeclaration> VariableDeclaration():
 {
-    <IDENTIFIER>  ((<COMMA> <IDENTIFIER> )* <COLON>| <COLON> <ARRAY_KEYWORD><LBRACKET> <INTEGER_CONSTANT> <RBRACKET> <OF_KEYWORD> )  TypeIdentifier() <SEMICOLON>
+    this.semanticStack.pushBlock(BlockType.VAR_BLOCK);
+    Token name=null,typeIdentifier=null,arrayKeyword=null,arrayLen=null;
+
+    String varValue = "";
+    int varDefLine = name.beginLine;
+    SymbolType varSymbolType = SymbolType.VARIABLE;
+    DataType varDataType = DataTypes.getDataType(typeIdentifier.image);
+    int varLen = 1;
+    int varDimension = 0;
+
+    SymbolEntry tmp = new SymbolEntry();
+    ArrayList<String> names = new ArrayList();
+     ArrayList<VariableDeclaration> variables = new ArrayList<>();
+ }
+{
+    name=<IDENTIFIER>
+{
+    names.add(name.image);
+}
+((<COMMA> name=<IDENTIFIER>
+{
+    names.add(name.image);
+} )* <COLON>| <COLON> arrayKeyword=<ARRAY_KEYWORD> <LBRACKET> arrayLen=<INTEGER_CONSTANT> <RBRACKET> <OF_KEYWORD> )  typeIdentifier=TypeIdentifier() <SEMICOLON>
+{
+    if(arrayKeyword!=null){
+        varSymbolType = SymbolType.ARRAY;
+        varLen=Integer.parseInt(arrayLen.image);
+        tmp = new SymbolEntry(name.image,varValue,varDefLine,varSymbolType,varDataType,varLen,varDimension);
+        semanticAnalyzer.checkArrayRedefinition(tmp);
+    }else{
+        for(String id: names){
+            tmp = new SymbolEntry(id,varValue,varDefLine,varSymbolType,varDataType,varLen,varDimension);
+            semanticAnalyzer.checkVariableRedefinition(tmp);
+        }
+    }
+}
+//{
+//    for(String s:ids){
+//        String identifierName = newVariable.image;
+//        if(symbolTable.lookSymbol(identifierName)){
+//            errorLog.logSemanticError(newVariable.beginLine,"Redeclaracion de la variable "+identifierName);
+//        }else{
+//            dimension = arrayKeyword != null ? 1:0;
+//            len = arraySize!=null ? Integer.parseInt(arraySize.image):0;
+//            symbolTable.addSymbol(new SymbolEntry(s,"",typeIdentifier.image, DataTypes.getSize(typeIdentifier.image,len),dimension));
+//        }
+//    }
+//}
+
+{
+    this.semanticStack.popBlock();
+    return variables;
+}
 }
 
 //void ParamDefinition():

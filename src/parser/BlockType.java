@@ -1,0 +1,5 @@
+package parser;
+
+public enum BlockType {
+    PROGRAM_BLOCK,VAR_BLOCK,CONST_BLOCK,CODE_BLOCK,IF_BLOCK,ELSE_BLOCK,FOR_BLOCK,WHILE_BLOCK;
+}
