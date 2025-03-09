@@ -29,6 +29,8 @@ public class Main {
         }catch (TokenMgrError e){
             System.out.println("Error: " + e.getMessage());
         }
-        parser.printErrors();
+        if(parser!=null){
+            parser.printErrors();
+        }
     }
 }

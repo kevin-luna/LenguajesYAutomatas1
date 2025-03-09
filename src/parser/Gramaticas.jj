@@ -171,7 +171,7 @@ ConstBlock ConstBlock() :
     {
         SymbolEntry newConstant = new SymbolEntry(
                 identifier.image,
-                value,
+                "value",
                 identifier.beginLine,
                 SymbolType.CONSTANT,
                 DataTypes.getDataType(typeIdentifier.image),
@@ -252,18 +252,33 @@ Token TypeIdentifier():
 //}
 
 
-void Expression():
-{}
+Expression Expression():
+{
+    SimpleExpression left=null,right=null;
+    DataType returnType=null;
+    Token operator=null;
+ }
 {
     //La gramatica comentada soporta el uso de la palabra reservada IN para trabajar con conjuntos.
     //SimpleExpression() ((<EQ_OP> | <LT_OP> | <GT_OP> | <NEQ_OP> | <LE_OP> | <GE_OP> | <IN_KEYWORD>) SimpleExpression() )?
-    SimpleExpression() ((<EQ_OP> | <LT_OP> | <GT_OP> | <NEQ_OP> | <LE_OP> | <GE_OP>) SimpleExpression() )?
+    left=SimpleExpression() ((operator=<EQ_OP> |operator=<LT_OP> | operator=<GT_OP> | operator=<NEQ_OP> | operator=<LE_OP> | operator=<GE_OP>) right=SimpleExpression() )?
+
+    {
+        if(operator!=null){
+            returnType = operator != null ? DataType.BOOLEAN : left.getReturnType();
+        }
+    }
+
+    {return new Expression(returnType,operator.image,left,right);}
 }
 
 void SimpleExpression():
 {}
 {
-    (<ADD_OP> | <SUB_OP>)? Term() ( ( <OR_KEYWORD> | <AND_KEYWORD> | <NOT_KEYWORD> | <ADD_OP> | <SUB_OP> ) Term())*
+    //Solo se incluye "or", "+" y "-" a este nivel
+    // por la precedencia de los operadores
+    // para el orden de evaluación
+    (<ADD_OP> | <SUB_OP>)? Term() ( ( <OR_KEYWORD> | <ADD_OP> | <SUB_OP> ) Term())*
 }
 
 
@@ -278,35 +293,56 @@ void Factor():
 {
     //La gramatica comentada acepta las llamadas a funciones como un factor para una expresion
     //FunctionCall() | <IDENTIFIER>  | Constant() | Variable() | UnsignedConstant() | <LPAREN> Expression() <RPAREN> | <NOT_KEYWORD> Factor() | <LBRACKET> Expression() (<RANGE_OP> Expression())? (<COMMA> Expression() (<RANGE_OP> Expression())?)* <RBRACKET>
-    Constant() | Variable() | UnsignedConstant() | <LPAREN> Expression() <RPAREN> | <NOT_KEYWORD> Factor() | <LBRACKET> Expression() (<RANGE_OP> Expression())? (<COMMA> Expression() (<RANGE_OP> Expression())?)* <RBRACKET>
+    Constant() | Variable() | UnsignedConstant() | <LPAREN> Expression() <RPAREN> | <NOT_KEYWORD> Factor()
 }
 
-Token Constant():
+Constant Constant():
 {
-    Token sign=null;
-    Token value=null;
+    Token sign=null,value=null,identifier=null,number=null,charConstant=null,stringConstant=null;
+
  }
 {
-    (((sign=<ADD_OP> | sign=<SUB_OP>)? (<IDENTIFIER> | UnsignedNumber())) | <CHAR_CONSTANT> | <STRING_CONSTANT>)
+    (((sign=<ADD_OP> | sign=<SUB_OP>)? (identifier=<IDENTIFIER>{
+        semanticAnalyzer.checkSymbolExists(identifier.image);
+    }
+    | UnsignedNumber())) | <CHAR_CONSTANT> | <STRING_CONSTANT>)
 
-    {return value;}
+    {return new Constant(sign.image,);}
 }
 
 
-void UnsignedConstant():
-{}
+UnsignedConstant UnsignedConstant():
 {
-    <IDENTIFIER> | UnsignedNumber() | <NIL_KEYWORD> | <CHAR_CONSTANT> | <STRING_CONSTANT>
-}
-
-Token UnsignedNumber():
-{
-        Token literal;
+   Token identifier=null,charLiteral=null,stringLiteral=null;
+   UnsignedNumber numericLiteral = null;
+    String val;DataType type;
 }
 {
-    literal=<INTEGER_CONSTANT> | literal=<REAL_CONSTANT>
+    (identifier=<IDENTIFIER> {
+        if(semanticAnalyzer.checkSymbolExists(identifier.image)){
+            return new UnsignedConstant(
+                identifier.image,
+                symbolTable.getDataType(identifier.image)
+            );
+        }
+    }
+    | numericLiteral=UnsignedNumber() {return new UnsignedConstant(numericLiteral.image, numericLiteral.getType());}/*| <NIL_KEYWORD> */
+    | charLiteral=<CHAR_CONSTANT> {return new UnsignedConstant(charLiteral.image, DataType.CHAR);}
+    | stringLiteral=<STRING_CONSTANT> {return new UnsignedConstant(stringLiteral.image,DataType.STRING);})
 
-    {return literal;}
+    {return new UnsignedConstant();}
+}
+
+UnsignedNumber UnsignedNumber():
+{
+    Token numericLiteral;
+    DataType dataType;
+}
+{
+    (numericLiteral=<INTEGER_CONSTANT> {dataType = DataType.INTEGER;}
+    | numericLiteral=<REAL_CONSTANT> {dataType = DataType.REAL;})
+
+    {return new UnsignedNumber(numericLiteral.image, dataType);}
 }
 
 //void RecordReference():
@@ -316,10 +352,14 @@ Token UnsignedNumber():
 //    <IDENTIFIER> <PERIOD> (<IDENTIFIER> | ArrayReference() )
 //}
 
-void Variable():
-{}
+Variable Variable():
 {
-    <IDENTIFIER> (<LBRACKET> Expression() <RBRACKET>)?
+    Token identifier;
+}
+{
+    identifier=<IDENTIFIER> (<LBRACKET> Expression() <RBRACKET>)?
+
+    {return new Variable(identifier.image);}
 }
 
 /*
@@ -411,9 +451,19 @@ ArrayList<VariableDeclaration> VariableDeclaration():
 //}
 
 void AssignmentStatement():
-{}
 {
-    Variable() <ASSIGN_OP> Expression() <SEMICOLON>
+    Variable variable=null;
+    Expression expression=null;
+}
+{
+    variable=Variable() <ASSIGN_OP> expression=Expression() <SEMICOLON>
+    {
+        if(semanticAnalyzer.checkSymbolExists(variable.getName())){
+            if(!semanticAnalyzer.checkConstReassignment(variable.getName())){
+                //Comprobacion de coincidencia de tipos
+            }
+        }
+    }
 }
 
 void IfStatement():

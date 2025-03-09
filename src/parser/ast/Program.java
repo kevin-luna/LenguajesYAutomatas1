@@ -45,10 +45,6 @@ public class Program extends AST {
         this.codeBlock = codeBlock;
     }
 
-    @Override
-    public void checkSemantics() {
-
-    }
 
     @Override
     public void traverse() {

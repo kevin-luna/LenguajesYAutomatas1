@@ -12,10 +12,6 @@ public class ConstBlock extends AST{
         this.constants = constants;
     }
 
-    @Override
-    public void checkSemantics() {
-
-    }
 
     @Override
     public void traverse() {

@@ -17,11 +17,6 @@ public class VariableDeclaration extends AST{
     }
 
     @Override
-    public void checkSemantics() {
-
-    }
-
-    @Override
     public void traverse() {
 
     }

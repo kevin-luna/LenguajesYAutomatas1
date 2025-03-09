@@ -36,6 +36,39 @@ public class SemanticAnalyzer {
         return new ConstDeclaration(symbol.getName(),symbol.getDataType());
     }
 
+    public boolean checkConstReassignment(String name){
+        if(symbolTable.lookSymbol(name)){
+            SymbolEntry symbol = symbolTable.getSymbol(name);
+            SymbolType symbolType = symbolTable.getSymbolType(name);
+            if(symbol.getType()!= null && symbol.getType()== SymbolType.CONSTANT){
+                errorLog.logSemanticError(symbol.getDefLine(),"Redefinicion de constante "+symbol.getName());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean checkSymbolExists(String name){
+        if(!symbolTable.lookSymbol(name)){
+            SymbolEntry symbol = symbolTable.getSymbol(name);
+            errorLog.logSemanticError(symbol.getDefLine(),"Referencia a símbolo indefinido "+symbol.getName());
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isConstant(String name){
+        SymbolEntry symbol = symbolTable.getSymbol(name);
+        if(symbol!=null && symbol.getType()== SymbolType.CONSTANT)return true;
+        return false;
+    }
+
+    public boolean isVariable(String name){
+        SymbolEntry symbol = symbolTable.getSymbol(name);
+        if(symbol!=null && symbol.getType()== SymbolType.VARIABLE)return true;
+        return false;
+    }
+
     private boolean checkSymbolRedefinition(SymbolEntry symbol){
         String name = symbol.getName();
         int defLine = symbol.getDefLine();

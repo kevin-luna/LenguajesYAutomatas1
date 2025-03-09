@@ -12,6 +12,20 @@ public class SymbolTable {
         return symbolTable.containsKey(symbol);
     }
 
+    public SymbolType getSymbolType(String name) {
+        if(symbolTable.containsKey(name)) {
+            return symbolTable.get(name).getType();
+        }
+        return null;
+    }
+
+    public DataType getDataType(String name) {
+        if(symbolTable.containsKey(name)) {
+            return symbolTable.get(name).getDataType();
+        }
+        return null;
+    }
+
     public SymbolEntry getSymbol(String symbol){
         return symbolTable.get(symbol);
     }
