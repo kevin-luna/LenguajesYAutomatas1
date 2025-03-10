@@ -478,11 +478,11 @@ void ElseStatement():
     <ELSE_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )
 }
 
-void CaseStatement():
-{}
-{
-    <CASE_KEYWORD> Expression() <OF_KEYWORD> (Constant() (<COMMA> Constant() )* <COLON> (Statement() | CodeBlock() <SEMICOLON> ))+ <ELSE_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )<END_KEYWORD> <SEMICOLON>
-}
+//void CaseStatement():
+//{}
+//{
+//    <CASE_KEYWORD> Expression() <OF_KEYWORD> (Constant() (<COMMA> Constant() )* <COLON> (Statement() | CodeBlock() <SEMICOLON> ))+ <ELSE_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )<END_KEYWORD> <SEMICOLON>
+//}
 
 void WhileStatement():
 {}
