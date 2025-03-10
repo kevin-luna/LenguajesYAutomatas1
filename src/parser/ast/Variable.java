@@ -1,13 +1,16 @@
 package parser.ast;
 
+import parser.DataType;
+
 public class Variable extends AST{
     private String name;
 
     public Variable(){}
 
-    public Variable(String name){
+    public Variable(String name) {
         this.name = name;
     }
+
 
     @Override
     public void traverse() {

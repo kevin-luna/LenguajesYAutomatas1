@@ -51,91 +51,87 @@ public interface PascalParserConstants {
   /** RegularExpression Id. */
   int UNTIL_KEYWORD = 24;
   /** RegularExpression Id. */
-  int CASE_KEYWORD = 25;
+  int BREAK_KEYWORD = 25;
   /** RegularExpression Id. */
-  int BREAK_KEYWORD = 26;
+  int CONTINUE_KEYWORD = 26;
   /** RegularExpression Id. */
-  int CONTINUE_KEYWORD = 27;
+  int OR_KEYWORD = 27;
   /** RegularExpression Id. */
-  int OR_KEYWORD = 28;
+  int AND_KEYWORD = 28;
   /** RegularExpression Id. */
-  int AND_KEYWORD = 29;
+  int NOT_KEYWORD = 29;
   /** RegularExpression Id. */
-  int NOT_KEYWORD = 30;
+  int MOD_KEYWORD = 30;
   /** RegularExpression Id. */
-  int MOD_KEYWORD = 31;
+  int DIV_KEYWORD = 31;
   /** RegularExpression Id. */
-  int DIV_KEYWORD = 32;
+  int INT_KEYWORD = 32;
   /** RegularExpression Id. */
-  int INT_KEYWORD = 33;
+  int REAL_KEYWORD = 33;
   /** RegularExpression Id. */
-  int REAL_KEYWORD = 34;
+  int BOOLEAN_KEYWORD = 34;
   /** RegularExpression Id. */
-  int BOOLEAN_KEYWORD = 35;
+  int CHAR_KEYWORD = 35;
   /** RegularExpression Id. */
-  int CHAR_KEYWORD = 36;
+  int STRING_KEYWORD = 36;
   /** RegularExpression Id. */
-  int STRING_KEYWORD = 37;
+  int WRITELN_KEYWORD = 37;
   /** RegularExpression Id. */
-  int NIL_KEYWORD = 38;
+  int WRITE_KEYWORD = 38;
   /** RegularExpression Id. */
-  int WRITELN_KEYWORD = 39;
+  int READ_KEYWORD = 39;
   /** RegularExpression Id. */
-  int WRITE_KEYWORD = 40;
+  int READLN_KEYWORD = 40;
   /** RegularExpression Id. */
-  int READ_KEYWORD = 41;
+  int IDENTIFIER = 41;
   /** RegularExpression Id. */
-  int READLN_KEYWORD = 42;
+  int INTEGER_CONSTANT = 42;
   /** RegularExpression Id. */
-  int IDENTIFIER = 43;
+  int REAL_CONSTANT = 43;
   /** RegularExpression Id. */
-  int INTEGER_CONSTANT = 44;
+  int STRING_CONSTANT = 44;
   /** RegularExpression Id. */
-  int REAL_CONSTANT = 45;
+  int CHAR_CONSTANT = 45;
   /** RegularExpression Id. */
-  int STRING_CONSTANT = 46;
+  int ADD_OP = 46;
   /** RegularExpression Id. */
-  int CHAR_CONSTANT = 47;
+  int SUB_OP = 47;
   /** RegularExpression Id. */
-  int ADD_OP = 48;
+  int MUL_OP = 48;
   /** RegularExpression Id. */
-  int SUB_OP = 49;
+  int DIV_OP = 49;
   /** RegularExpression Id. */
-  int MUL_OP = 50;
+  int ASSIGN_OP = 50;
   /** RegularExpression Id. */
-  int DIV_OP = 51;
+  int EQ_OP = 51;
   /** RegularExpression Id. */
-  int ASSIGN_OP = 52;
+  int NEQ_OP = 52;
   /** RegularExpression Id. */
-  int EQ_OP = 53;
+  int LT_OP = 53;
   /** RegularExpression Id. */
-  int NEQ_OP = 54;
+  int GT_OP = 54;
   /** RegularExpression Id. */
-  int LT_OP = 55;
+  int LE_OP = 55;
   /** RegularExpression Id. */
-  int GT_OP = 56;
+  int GE_OP = 56;
   /** RegularExpression Id. */
-  int LE_OP = 57;
+  int LPAREN = 57;
   /** RegularExpression Id. */
-  int GE_OP = 58;
+  int RPAREN = 58;
   /** RegularExpression Id. */
-  int LPAREN = 59;
+  int LBRACKET = 59;
   /** RegularExpression Id. */
-  int RPAREN = 60;
+  int RBRACKET = 60;
   /** RegularExpression Id. */
-  int LBRACKET = 61;
+  int SEMICOLON = 61;
   /** RegularExpression Id. */
-  int RBRACKET = 62;
+  int COLON = 62;
   /** RegularExpression Id. */
-  int SEMICOLON = 63;
+  int COMMA = 63;
   /** RegularExpression Id. */
-  int COLON = 64;
+  int PERIOD = 64;
   /** RegularExpression Id. */
-  int COMMA = 65;
-  /** RegularExpression Id. */
-  int PERIOD = 66;
-  /** RegularExpression Id. */
-  int RANGE_OP = 67;
+  int RANGE_OP = 65;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -167,7 +163,6 @@ public interface PascalParserConstants {
     "\"downto\"",
     "\"repeat\"",
     "\"until\"",
-    "\"case\"",
     "\"break\"",
     "\"continue\"",
     "\"or\"",
@@ -180,7 +175,6 @@ public interface PascalParserConstants {
     "\"boolean\"",
     "\"char\"",
     "\"string\"",
-    "\"nil\"",
     "\"writeln\"",
     "\"write\"",
     "\"read\"",

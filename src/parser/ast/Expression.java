@@ -10,6 +10,13 @@ public class Expression extends AST{
 
     public Expression(){}
 
+    public Expression(DataType returnType,SimpleExpression leftOperand){
+        this.returnType = returnType;
+        this.leftOperand = leftOperand;
+        this.operator = "";
+        this.rightOperand = null;
+    }
+
     public Expression(DataType returnType, String operator, SimpleExpression leftOperand, SimpleExpression rightOperand) {
         this.returnType = returnType;
         this.operator = operator;

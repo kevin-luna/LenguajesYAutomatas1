@@ -1,8 +1,6 @@
 package parser;
 
-import parser.ast.ArrayDeclaration;
-import parser.ast.ConstDeclaration;
-import parser.ast.VariableDeclaration;
+import parser.ast.*;
 
 import java.util.Stack;
 
@@ -48,10 +46,9 @@ public class SemanticAnalyzer {
         return false;
     }
 
-    public boolean checkSymbolExists(String name){
+    public boolean checkSymbolExists(String name,int refLine){
         if(!symbolTable.lookSymbol(name)){
-            SymbolEntry symbol = symbolTable.getSymbol(name);
-            errorLog.logSemanticError(symbol.getDefLine(),"Referencia a símbolo indefinido "+symbol.getName());
+            errorLog.logSemanticError(refLine,"Referencia a símbolo indefinido "+name);
             return false;
         }
         return true;
@@ -66,6 +63,31 @@ public class SemanticAnalyzer {
     public boolean isVariable(String name){
         SymbolEntry symbol = symbolTable.getSymbol(name);
         if(symbol!=null && symbol.getType()== SymbolType.VARIABLE)return true;
+        return false;
+    }
+
+    public boolean checkExpression(SimpleExpression expr1, SimpleExpression expr2, int line){
+        if(expr1.getReturnType() == expr2.getReturnType()){
+            return true;
+        }
+        errorLog.logSemanticError(
+                line,
+                "No se puede comparar un tipo"
+                +expr1.getReturnType().toString()
+                +" con un tipo "
+                +expr2.getReturnType().toString()
+        );
+        return false;
+    }
+
+    public boolean checkFactorConsistency(Factor f1,Factor f2,String operator,int line){
+        if(operator=="and"){
+            return (f1.getReturnType()==DataType.BOOLEAN && f2.getReturnType()==DataType.BOOLEAN);
+        }
+        if(operator=="*" || operator=="div" || operator=="/" || operator=="mod")
+            return (f1.getReturnType()==DataType.INTEGER || f1.getReturnType()==DataType.REAL)
+                    && (f2.getReturnType()==DataType.INTEGER && f2.getReturnType()==DataType.REAL);
+        errorLog.logSemanticError(line,"Inconsistencia de tipos "+f1.getReturnType().toString()+" "+operator+" "+f2.getReturnType().toString());
         return false;
     }
 

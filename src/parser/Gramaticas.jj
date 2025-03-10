@@ -162,24 +162,28 @@ VarBlock VarBlock() :
 ConstBlock ConstBlock() :
 {
      semanticStack.pushBlock(BlockType.CONST_BLOCK);
-    Token identifier=null,typeIdentifier=null,value=null;
+    Token identifier=null,typeIdentifier=null;
+    Constant constant=null;
      String constName = "";
      ArrayList<ConstDeclaration> constants = new ArrayList();
 }
 {
-    <CONST_KEYWORD> ( identifier=<IDENTIFIER> <COLON> typeIdentifier=TypeIdentifier() <EQ_OP> value=Constant() <SEMICOLON> )*//Hay que ver como obtener el valor de la constante
-    {
-        SymbolEntry newConstant = new SymbolEntry(
-                identifier.image,
-                "value",
-                identifier.beginLine,
-                SymbolType.CONSTANT,
-                DataTypes.getDataType(typeIdentifier.image),
-                1,
-                0
-        );
-        semanticAnalyzer.checkConstantRedefinition(newConstant);
-    }
+    <CONST_KEYWORD> (
+      identifier=<IDENTIFIER> <COLON> typeIdentifier=TypeIdentifier() <EQ_OP> constant=Constant() <SEMICOLON>
+      {
+              SymbolEntry newConstant = new SymbolEntry(
+                      identifier.image,
+                      "value",
+                      identifier.beginLine,
+                      SymbolType.CONSTANT,
+                      DataTypes.getDataType(typeIdentifier.image),
+                      1,
+                      0
+              );
+              semanticAnalyzer.checkConstantRedefinition(newConstant);
+          }
+    )*
+
     {
     semanticStack.popBlock();
     return new ConstBlock(constants);
@@ -261,53 +265,96 @@ Expression Expression():
 {
     //La gramatica comentada soporta el uso de la palabra reservada IN para trabajar con conjuntos.
     //SimpleExpression() ((<EQ_OP> | <LT_OP> | <GT_OP> | <NEQ_OP> | <LE_OP> | <GE_OP> | <IN_KEYWORD>) SimpleExpression() )?
-    left=SimpleExpression() ((operator=<EQ_OP> |operator=<LT_OP> | operator=<GT_OP> | operator=<NEQ_OP> | operator=<LE_OP> | operator=<GE_OP>) right=SimpleExpression() )?
-
+    left=SimpleExpression() ((operator=<EQ_OP> |operator=<LT_OP> | operator=<GT_OP> | operator=<NEQ_OP> | operator=<LE_OP> | operator=<GE_OP>) right=SimpleExpression()
     {
-        if(operator!=null){
-            returnType = operator != null ? DataType.BOOLEAN : left.getReturnType();
+        returnType=left.getReturnType();
+        if(semanticAnalyzer.checkExpression(left,right,operator.beginLine)){
+                returnType = DataType.BOOLEAN;
+                return new Expression(returnType,operator.image,left,right);
         }
     }
+    )?
 
-    {return new Expression(returnType,operator.image,left,right);}
+    {
+    return new Expression(left.getReturnType(),left);
+    }
 }
 
-void SimpleExpression():
+SimpleExpression SimpleExpression():
 {}
 {
     //Solo se incluye "or", "+" y "-" a este nivel
     // por la precedencia de los operadores
     // para el orden de evaluación
     (<ADD_OP> | <SUB_OP>)? Term() ( ( <OR_KEYWORD> | <ADD_OP> | <SUB_OP> ) Term())*
+    {return new SimpleExpression();}
 }
 
 
-void Term():
-{}
+Term Term():
 {
-    Factor()  ((<MUL_OP> | <DIV_OP> | <MOD_KEYWORD> | <AND_KEYWORD>) Factor() )*
+    Factor firstFactor = null,curr=null,prev=null;
+    ArrayList<Factor> otherFactors = new ArrayList<>();
+    ArrayList<String> operators = new ArrayList();
+    Token op=null;
+}
+{
+    firstFactor=Factor() {prev=firstFactor;}
+    ((op=<MUL_OP> | op=<DIV_OP> | op=<DIV_KEYWORD> |op=<MOD_KEYWORD> | op=<AND_KEYWORD>) {operators.add(op.image);}
+    curr=Factor() {
+        otherFactors.add(curr);
+        if(semanticAnalyzer.checkFactorConsistency(curr,prev,op.image,op.beginLine)){
+            if(prev.getReturnType()==DataType.REAL || curr.getReturnType()==DataType.REAL){
+
+            }
+        }else{
+
+        }
+
+        prev=curr;
+    }
+    )*
+
+    {
+        return new Term();
+    }
 }
 
-void Factor():
-{}
+Factor Factor():
+{
+        Variable variable=null;
+        UnsignedConstant unsignedConstant=null;
+        Expression expr = null;
+}
 {
     //La gramatica comentada acepta las llamadas a funciones como un factor para una expresion
     //FunctionCall() | <IDENTIFIER>  | Constant() | Variable() | UnsignedConstant() | <LPAREN> Expression() <RPAREN> | <NOT_KEYWORD> Factor() | <LBRACKET> Expression() (<RANGE_OP> Expression())? (<COMMA> Expression() (<RANGE_OP> Expression())?)* <RBRACKET>
-    Constant() | Variable() | UnsignedConstant() | <LPAREN> Expression() <RPAREN> | <NOT_KEYWORD> Factor()
+     (variable=Variable() {return new Factor(variable.getName(),symbolTable.getDataType(variable.getName()));}
+    | unsignedConstant=UnsignedConstant() {}
+    | <LPAREN> expr=Expression() <RPAREN> {}
+    | <NOT_KEYWORD> Factor(){})
+
+    {return new Factor();}
 }
 
 Constant Constant():
 {
-    Token sign=null,value=null,identifier=null,number=null,charConstant=null,stringConstant=null;
-
+    Token sign=null,identifier=null,charConstant=null,stringConstant=null;
+    UnsignedNumber unsignedNumber=null;
  }
 {
-    (((sign=<ADD_OP> | sign=<SUB_OP>)? (identifier=<IDENTIFIER>{
-        semanticAnalyzer.checkSymbolExists(identifier.image);
-    }
-    | UnsignedNumber())) | <CHAR_CONSTANT> | <STRING_CONSTANT>)
+    (((sign=<ADD_OP> | sign=<SUB_OP>)? (
 
-    {return new Constant(sign.image,);}
+    identifier=<IDENTIFIER>{
+        if(semanticAnalyzer.checkSymbolExists(identifier.image,identifier.beginLine))
+            return new Constant(identifier.image,symbolTable.getDataType(identifier.image),sign.image);
+    }
+    | unsignedNumber=UnsignedNumber() {return new Constant(unsignedNumber.getValue(),symbolTable.getDataType(identifier.image),sign.image);}))
+    | charConstant=<CHAR_CONSTANT> {return new Constant(charConstant.image,DataType.CHAR,null);}
+    | stringConstant=<STRING_CONSTANT> {return new Constant(stringConstant.image,DataType.STRING,null);}
+    )
+
+    {return new Constant();}
 }
 
 
@@ -319,14 +366,14 @@ UnsignedConstant UnsignedConstant():
 }
 {
     (identifier=<IDENTIFIER> {
-        if(semanticAnalyzer.checkSymbolExists(identifier.image)){
+        if(semanticAnalyzer.checkSymbolExists(identifier.image, identifier.beginLine)){
             return new UnsignedConstant(
                 identifier.image,
                 symbolTable.getDataType(identifier.image)
             );
         }
     }
-    | numericLiteral=UnsignedNumber() {return new UnsignedConstant(numericLiteral.image, numericLiteral.getType());}/*| <NIL_KEYWORD> */
+    | numericLiteral=UnsignedNumber() {return new UnsignedConstant(numericLiteral.getValue(), numericLiteral.getType());}/*| <NIL_KEYWORD> */
     | charLiteral=<CHAR_CONSTANT> {return new UnsignedConstant(charLiteral.image, DataType.CHAR);}
     | stringLiteral=<STRING_CONSTANT> {return new UnsignedConstant(stringLiteral.image,DataType.STRING);})
 
@@ -359,7 +406,10 @@ Variable Variable():
 {
     identifier=<IDENTIFIER> (<LBRACKET> Expression() <RBRACKET>)?
 
-    {return new Variable(identifier.image);}
+    {
+        semanticAnalyzer.checkSymbolExists(identifier.image,identifier.beginLine);
+        return new Variable(identifier.image);
+    }
 }
 
 /*
@@ -372,9 +422,9 @@ ArrayList<VariableDeclaration> VariableDeclaration():
     Token name=null,typeIdentifier=null,arrayKeyword=null,arrayLen=null;
 
     String varValue = "";
-    int varDefLine = name.beginLine;
+    int varDefLine;
     SymbolType varSymbolType = SymbolType.VARIABLE;
-    DataType varDataType = DataTypes.getDataType(typeIdentifier.image);
+    DataType varDataType = null;
     int varLen = 1;
     int varDimension = 0;
 
@@ -385,13 +435,17 @@ ArrayList<VariableDeclaration> VariableDeclaration():
 {
     name=<IDENTIFIER>
 {
+    varDefLine = name.beginLine;
     names.add(name.image);
 }
 ((<COMMA> name=<IDENTIFIER>
 {
     names.add(name.image);
-} )* <COLON>| <COLON> arrayKeyword=<ARRAY_KEYWORD> <LBRACKET> arrayLen=<INTEGER_CONSTANT> <RBRACKET> <OF_KEYWORD> )  typeIdentifier=TypeIdentifier() <SEMICOLON>
+} )* <COLON> | <COLON> arrayKeyword=<ARRAY_KEYWORD> <LBRACKET> arrayLen=<INTEGER_CONSTANT> <RBRACKET> <OF_KEYWORD> )
+
+typeIdentifier=TypeIdentifier() <SEMICOLON>
 {
+    varDataType = DataTypes.getDataType(typeIdentifier.image);
     if(arrayKeyword!=null){
         varSymbolType = SymbolType.ARRAY;
         varLen=Integer.parseInt(arrayLen.image);
@@ -458,10 +512,8 @@ void AssignmentStatement():
 {
     variable=Variable() <ASSIGN_OP> expression=Expression() <SEMICOLON>
     {
-        if(semanticAnalyzer.checkSymbolExists(variable.getName())){
-            if(!semanticAnalyzer.checkConstReassignment(variable.getName())){
-                //Comprobacion de coincidencia de tipos
-            }
+        if(!semanticAnalyzer.checkConstReassignment(variable.getName())){
+            //Comprobacion de coincidencia de tipos
         }
     }
 }
