@@ -55,7 +55,7 @@ TOKEN : {
       | < DOWNTO_KEYWORD : "downto" >
       | < REPEAT_KEYWORD : "repeat" >
       | < UNTIL_KEYWORD : "until" >
-      | < CASE_KEYWORD : "case" >
+      //| < CASE_KEYWORD : "case" >
       //| < RECORD_KEYWORD : "record" >
       //| < TYPE_KEYWORD : "type" >
       //| < WITH_KEYWORD : "with" >
@@ -73,7 +73,7 @@ TOKEN : {
       | <BOOLEAN_KEYWORD : "boolean" >
       | <CHAR_KEYWORD : "char" >
       | <STRING_KEYWORD  : "string">
-      | <NIL_KEYWORD : "nil" >
+      //| <NIL_KEYWORD : "nil" >
       //La palabra reservada packed sirve para optimizar el uso de memoria en arreglos y registros eliminando bytes de relleno
       //| <PACKED_KEYWORD: "packed">
       //| <IN_KEYWORD : "in">
