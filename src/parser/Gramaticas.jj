@@ -82,6 +82,8 @@ TOKEN : {
       | <WRITE_KEYWORD : "write">
       | <READ_KEYWORD : "read">
       | <READLN_KEYWORD : "readln">
+      | <TRUE_KEYWORD : "true">
+      | <FALSE_KEYWORD: "false">
 
 
   |  < IDENTIFIER : (["a"-"z","A"-"Z"])+ (["a"-"z","A"-"Z","0"-"9"])* >
@@ -281,12 +283,22 @@ Expression Expression():
 }
 
 SimpleExpression SimpleExpression():
-{}
+{
+    Token sign=null;
+    Term firstTerm = null,curr=null,prev=null;
+    ArrayList<Term> otherTerms= new ArrayList<>();
+    ArrayList<String> operators = new ArrayList();
+ }
 {
     //Solo se incluye "or", "+" y "-" a este nivel
     // por la precedencia de los operadores
     // para el orden de evaluación
-    (<ADD_OP> | <SUB_OP>)? Term() ( ( <OR_KEYWORD> | <ADD_OP> | <SUB_OP> ) Term())*
+    (sign=<ADD_OP> | sign=<SUB_OP>)
+    firstTerm=Term()
+    {
+
+    }
+     ( ( <OR_KEYWORD> | <ADD_OP> | <SUB_OP> ) Term())*
     {return new SimpleExpression();}
 }
 
@@ -325,14 +337,15 @@ Factor Factor():
         Variable variable=null;
         UnsignedConstant unsignedConstant=null;
         Expression expr = null;
+        Factor factor = null;
 }
 {
     //La gramatica comentada acepta las llamadas a funciones como un factor para una expresion
     //FunctionCall() | <IDENTIFIER>  | Constant() | Variable() | UnsignedConstant() | <LPAREN> Expression() <RPAREN> | <NOT_KEYWORD> Factor() | <LBRACKET> Expression() (<RANGE_OP> Expression())? (<COMMA> Expression() (<RANGE_OP> Expression())?)* <RBRACKET>
-     (variable=Variable() {return new Factor(variable.getName(),symbolTable.getDataType(variable.getName()));}
-    | unsignedConstant=UnsignedConstant() {}
-    | <LPAREN> expr=Expression() <RPAREN> {}
-    | <NOT_KEYWORD> Factor(){})
+     (variable=Variable() {return new Factor(variable.getName());}
+    | unsignedConstant=UnsignedConstant() {return new Factor(unsignedConstant);}
+    | <LPAREN> expr=Expression() <RPAREN> {return new Factor(expr);}
+    | <NOT_KEYWORD> factor=Factor(){return new Factor(factor);})
 
     {return new Factor();}
 }
@@ -343,15 +356,19 @@ Constant Constant():
     UnsignedNumber unsignedNumber=null;
  }
 {
-    (((sign=<ADD_OP> | sign=<SUB_OP>)? (
+    (
+    ((sign=<ADD_OP> | sign=<SUB_OP>)? (
 
     identifier=<IDENTIFIER>{
-        if(semanticAnalyzer.checkSymbolExists(identifier.image,identifier.beginLine))
-            return new Constant(identifier.image,symbolTable.getDataType(identifier.image),sign.image);
+        DataType dt = symbolTable.getDataType(identifier.image);
+        if(dt!=null && semanticAnalyzer.checkConstant(dt,sign.image,identifier.beginLine)){
+            return new Constant(identifier.image,dt,sign.image);
+        }
     }
-    | unsignedNumber=UnsignedNumber() {return new Constant(unsignedNumber.getValue(),symbolTable.getDataType(identifier.image),sign.image);}))
-    | charConstant=<CHAR_CONSTANT> {return new Constant(charConstant.image,DataType.CHAR,null);}
-    | stringConstant=<STRING_CONSTANT> {return new Constant(stringConstant.image,DataType.STRING,null);}
+    | unsignedNumber=UnsignedNumber() { return new Constant(unsignedNumber.getValue(),symbolTable.getDataType(identifier.image),sign.image);})
+    )
+    | charConstant=<CHAR_CONSTANT> {return new Constant(charConstant.image,DataType.CHAR);}
+    | stringConstant=<STRING_CONSTANT> {return new Constant(stringConstant.image,DataType.STRING);}
     )
 
     {return new Constant();}
@@ -360,7 +377,7 @@ Constant Constant():
 
 UnsignedConstant UnsignedConstant():
 {
-   Token identifier=null,charLiteral=null,stringLiteral=null;
+   Token identifier=null,charLiteral=null,stringLiteral=null,booleanLiteral=null;
    UnsignedNumber numericLiteral = null;
     String val;DataType type;
 }
@@ -376,6 +393,7 @@ UnsignedConstant UnsignedConstant():
     | numericLiteral=UnsignedNumber() {return new UnsignedConstant(numericLiteral.getValue(), numericLiteral.getType());}/*| <NIL_KEYWORD> */
     | charLiteral=<CHAR_CONSTANT> {return new UnsignedConstant(charLiteral.image, DataType.CHAR);}
     | stringLiteral=<STRING_CONSTANT> {return new UnsignedConstant(stringLiteral.image,DataType.STRING);})
+    | (booleanLiteral=<TRUE_KEYWORD> | booleanLiteral=<FALSE_KEYWORD> ) {return new UnsignedConstant(booleanLiteral.image,DataType.BOOLEAN);}
 
     {return new UnsignedConstant();}
 }
@@ -401,14 +419,22 @@ UnsignedNumber UnsignedNumber():
 
 Variable Variable():
 {
-    Token identifier;
+    Token identifier=null;
+    Expression expr=null;
 }
 {
-    identifier=<IDENTIFIER> (<LBRACKET> Expression() <RBRACKET>)?
+    identifier=<IDENTIFIER>
+    (<LBRACKET> expr=Expression() <RBRACKET>
+    {
+        if(semanticAnalyzer.checkArray(identifier.image,expr,identifier.beginLine)) return new Variable(identifier.image,expr,symbolTable.getDataType(identifier.image));
+    }
+    )?
 
     {
-        semanticAnalyzer.checkSymbolExists(identifier.image,identifier.beginLine);
-        return new Variable(identifier.image);
+        if(semanticAnalyzer.checkSymbolExists(identifier.image,identifier.beginLine)){
+            return new Variable(identifier.image,symbolTable.getDataType(identifier.image));
+        }
+        return new Variable();
     }
 }
 

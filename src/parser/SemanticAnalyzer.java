@@ -2,6 +2,7 @@ package parser;
 
 import parser.ast.*;
 
+import javax.xml.crypto.Data;
 import java.util.Stack;
 
 public class SemanticAnalyzer {
@@ -46,12 +47,45 @@ public class SemanticAnalyzer {
         return false;
     }
 
+    public boolean checkConstant(DataType dataType,String sign,int line){
+        if(sign!=null && (dataType==DataType.REAL || dataType== DataType.INTEGER)){
+            return true;
+        }
+        errorLog.logSemanticError(line,"No se puede aplicar el signo "+sign+" a un tipo "+dataType);
+        return false;
+    }
+
     public boolean checkSymbolExists(String name,int refLine){
         if(!symbolTable.lookSymbol(name)){
             errorLog.logSemanticError(refLine,"Referencia a símbolo indefinido "+name);
             return false;
         }
         return true;
+    }
+
+    public boolean checkSymbolIsNumeric(String name,int refLine){
+        if(!symbolTable.lookSymbol(name)){
+            DataType dt = symbolTable.getSymbol(name).getDataType();
+            return dt==DataType.INTEGER || dt==DataType.REAL;
+        }
+        return false;
+    }
+
+    public boolean checkArray(String name,Expression expr,int refLine){
+        if(!symbolTable.lookSymbol(name)){
+            if(isArray(name)){
+                if(expr.getReturnType()==DataType.INTEGER){
+                    return true;
+                }else{
+                    errorLog.logSemanticError(refLine,"El indice del arreglo "+name+" debe ser un entero");
+                }
+            }else{
+                errorLog.logSemanticError(refLine,"El simbolo "+name+" no es un arreglo");
+            }
+        }else{
+            errorLog.logSemanticError(refLine,"El simbolo "+name+" no esta definido");
+        }
+        return false;
     }
 
     public boolean isConstant(String name){
@@ -63,6 +97,12 @@ public class SemanticAnalyzer {
     public boolean isVariable(String name){
         SymbolEntry symbol = symbolTable.getSymbol(name);
         if(symbol!=null && symbol.getType()== SymbolType.VARIABLE)return true;
+        return false;
+    }
+
+    public boolean isArray(String name){
+        SymbolEntry symbol = symbolTable.getSymbol(name);
+        if(symbol!=null && symbol.getType()== SymbolType.ARRAY)return true;
         return false;
     }
 

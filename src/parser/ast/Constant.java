@@ -7,8 +7,9 @@ public class Constant extends UnsignedConstant{
 
     public Constant(){}
 
-    public Constant(String sign) {
-        this.sign = sign;
+    public Constant(String value,DataType type){
+        this.value = value;
+        this.type = type;
     }
 
     public Constant(String value, DataType type, String sign) {
