@@ -152,6 +152,10 @@ public class SemanticAnalyzer {
         return false;
     }
 
+    public boolean checkAssignment(Variable variable,Expression expression){
+        return variable.getDataType()==expression.getReturnType();
+    }
+
     private boolean checkSymbolRedefinition(SymbolEntry symbol){
         String name = symbol.getName();
         int defLine = symbol.getDefLine();

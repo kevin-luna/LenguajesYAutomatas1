@@ -565,26 +565,46 @@ void AssignmentStatement():
 {
     Variable variable=null;
     Expression expression=null;
+    Token assignmentOp=null;
 }
 {
-    variable=Variable() <ASSIGN_OP> expression=Expression() <SEMICOLON>
+    variable=Variable() assignmentOp=<ASSIGN_OP> expression=Expression() <SEMICOLON>
     {
         if(!semanticAnalyzer.checkConstReassignment(variable.getName())){
-            //Comprobacion de coincidencia de tipos
+            if(!semanticAnalyzer.checkAssignment(variable,expression)){
+                errorLog.logSemanticError(assignmentOp.beginLine, "No se puede asignar un "+expression.getReturnType()+" a un "+variable.getDataType());
+            }
+            return new AssignmentStatement();
         }
+        return new AssignmentStatement(variable,assignment);
     }
 }
 
-void IfStatement():
-{}
+IfStatement IfStatement():
 {
-    <IF_KEYWORD> Expression() <THEN_KEYWORD> (Statement() | CodeBlock() <SEMICOLON>)  (ElseStatement())?
+        Expression expr=null;
+        Token ifKeyword=null;
+}
+{
+    <IF_KEYWORD> expr=Expression()
+    {
+        if(expr.getReturnType()!=DataType.BOOLEAN){
+            errorLog.logSemanticError(ifKeyword.beginLine, "Se asigno una expresion no BOOLEANA al bloque IF");
+            return new IfStatement();
+        }
+    }
+     <THEN_KEYWORD> (Statement() | CodeBlock() <SEMICOLON>)  (ElseStatement())?
+     {return new IfStatement();}
 }
 
-void ElseStatement():
-{}
+ElseStatement ElseStatement():
+{Statement statement=null;CodeBlock codeBlock=null;}
 {
-    <ELSE_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )
+    <ELSE_KEYWORD> (statement=Statement() | codeBlock=CodeBlock() <SEMICOLON> )
+    {
+        if(statement!=null)return new ElseStatemnent(statement);
+        return new ElseStatement(codeBlock);
+    }
 }
 
 //void CaseStatement():
@@ -593,10 +613,20 @@ void ElseStatement():
 //    <CASE_KEYWORD> Expression() <OF_KEYWORD> (Constant() (<COMMA> Constant() )* <COLON> (Statement() | CodeBlock() <SEMICOLON> ))+ <ELSE_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )<END_KEYWORD> <SEMICOLON>
 //}
 
-void WhileStatement():
-{}
+WhileStatement WhileStatement():
 {
-    <WHILE_KEYWORD> Expression() <DO_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )
+    Expression expr=null;
+    Token whileKeyword=null;
+}
+{
+    whileKeyword=<WHILE_KEYWORD> expr=Expression()
+    {
+        if(expr.getReturnType()!=DataType.BOOLEAN){
+            errorLog.logSemanticError(whileKeyword.beginLine,"Se asigno una expresion no BOOLEANA al bloque WHILE");
+            return new WhileStatement();
+        }
+    }
+     <DO_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )
 }
 
 //void RepeatStatement():
@@ -605,10 +635,13 @@ void WhileStatement():
 //    <REPEAT_KEYWORD> (Statement())* <UNTIL_KEYWORD> Expression() <SEMICOLON>
 //}
 
-void ForStatement():
-{}
+ForStatement ForStatement():
 {
-    <FOR_KEYWORD> <IDENTIFIER> <ASSIGN_OP> Expression() (<DOWNTO_KEYWORD> | <TO_KEYWORD> ) Expression() <DO_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )
+        Expression expr=null;
+        Token forKeyword=null,identifier=null;
+}
+{
+    forKeyword=<FOR_KEYWORD> identifier=<IDENTIFIER> <ASSIGN_OP> Expression() (<DOWNTO_KEYWORD> | <TO_KEYWORD> ) Expression() <DO_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )
 }
 
 void ReadlnCall():
