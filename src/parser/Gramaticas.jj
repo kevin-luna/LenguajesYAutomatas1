@@ -284,22 +284,46 @@ Expression Expression():
 
 SimpleExpression SimpleExpression():
 {
-    Token sign=null;
+    Token sign=null,op=null;
     Term firstTerm = null,curr=null,prev=null;
     ArrayList<Term> otherTerms= new ArrayList<>();
     ArrayList<String> operators = new ArrayList();
+    boolean simpleExpressionIsValid=true;
  }
 {
     //Solo se incluye "or", "+" y "-" a este nivel
     // por la precedencia de los operadores
     // para el orden de evaluación
-    (sign=<ADD_OP> | sign=<SUB_OP>)
+    (sign=<ADD_OP> | sign=<SUB_OP>)?
     firstTerm=Term()
     {
-
+        prev=firstTerm;
+        if(sign!=null && !semanticAnalyzer.termIsNumeric(firstTerm)){
+            errorLog.logSemanticError(sign.beginLine,"No se puede aplicar el signo "+sign.image+" a un valor no numerico");
+        }
     }
-     ( ( <OR_KEYWORD> | <ADD_OP> | <SUB_OP> ) Term())*
-    {return new SimpleExpression();}
+     ( ( op=<OR_KEYWORD> |op=<ADD_OP> | op=<SUB_OP> ) curr=Term()
+        {
+            if(op.image.toLowerCase()=="or"){
+                if(!semanticAnalyzer.termIsBoolean(prev) || !semanticAnalyzer.termIsBoolean(curr)){
+                    errorLog.logSemanticError(op.beginLine,"No se puede aplicar la operacion OR a tipos no booleanos");
+                    simpleExpressionIsValid=false;
+                }
+            }else{
+                if(!semanticAnalyzer.termIsNumeric(prev) || !semanticAnalyzer.termIsNumeric(curr)){
+                    errorLog.logSemanticError(op.beginLine,"No se puede aplicar la operacion "+op.image+" a tipos no numericos");
+                    simpleExpressionIsValid=false;
+                }
+            }
+            operators.add(op.image);
+            otherTerms.add(curr);
+            prev=curr;
+        }
+     )*
+    {
+        if(simpleExpressionIsValid) return new SimpleExpression(firstTerm,otherTerms,operators);
+        return new SimpleExpression();
+    }
 }
 
 
@@ -309,25 +333,31 @@ Term Term():
     ArrayList<Factor> otherFactors = new ArrayList<>();
     ArrayList<String> operators = new ArrayList();
     Token op=null;
+    boolean termIsValid=true;
 }
 {
     firstFactor=Factor() {prev=firstFactor;}
-    ((op=<MUL_OP> | op=<DIV_OP> | op=<DIV_KEYWORD> |op=<MOD_KEYWORD> | op=<AND_KEYWORD>) {operators.add(op.image);}
+    ((op=<MUL_OP> | op=<DIV_OP> | op=<DIV_KEYWORD> |op=<MOD_KEYWORD> | op=<AND_KEYWORD>)
     curr=Factor() {
-        otherFactors.add(curr);
-        if(semanticAnalyzer.checkFactorConsistency(curr,prev,op.image,op.beginLine)){
-            if(prev.getReturnType()==DataType.REAL || curr.getReturnType()==DataType.REAL){
-
+        if(op.image.toLowerCase() == "and"){
+            if(!semanticAnalyzer.factorIsBoolean(prev) || !semanticAnalyzer.factorIsBoolean(curr)){
+                errorLog.logSemanticError(op.beginLine,"No se puede aplicar la operacion AND a tipos no booleanos");
+                termIsValid=false;
             }
         }else{
-
+            if(!semanticAnalyzer.factorIsNumeric(prev) || !semanticAnalyzer.factorIsNumeric(curr)){
+                errorLog.logSemanticError(op.beginLine,"No se puede aplicar la operacion "+op.image+" a tipos no numericos");
+                termIsValid=false;
+            }
         }
-
+        operators.add(op.image);
+        otherFactors.add(curr);
         prev=curr;
     }
     )*
 
     {
+        if(termIsValid) return new Term(firstFactor,operators,otherFactors);
         return new Term();
     }
 }
@@ -338,13 +368,14 @@ Factor Factor():
         UnsignedConstant unsignedConstant=null;
         Expression expr = null;
         Factor factor = null;
+        Token lparen=null,rparen=null;
 }
 {
     //La gramatica comentada acepta las llamadas a funciones como un factor para una expresion
     //FunctionCall() | <IDENTIFIER>  | Constant() | Variable() | UnsignedConstant() | <LPAREN> Expression() <RPAREN> | <NOT_KEYWORD> Factor() | <LBRACKET> Expression() (<RANGE_OP> Expression())? (<COMMA> Expression() (<RANGE_OP> Expression())?)* <RBRACKET>
-     (variable=Variable() {return new Factor(variable.getName());}
+     (variable=Variable() {return new Factor(variable);}
     | unsignedConstant=UnsignedConstant() {return new Factor(unsignedConstant);}
-    | <LPAREN> expr=Expression() <RPAREN> {return new Factor(expr);}
+    | <LPAREN> expr=Expression() <RPAREN> { return new Factor(expr,(lparen!=null && rparen!=null) ? true:false);}
     | <NOT_KEYWORD> factor=Factor(){return new Factor(factor);})
 
     {return new Factor();}

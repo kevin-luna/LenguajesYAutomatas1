@@ -2,19 +2,48 @@ package parser.ast;
 
 import parser.DataType;
 
+import java.util.ArrayList;
+
 public class SimpleExpression extends AST{
+    private Term firstTerm;
+    private ArrayList<Term> otherTerms;
+    private ArrayList<String> operators;
     private DataType returnType;
-    private String operator;
-    private Term left;
-    private Term right;
 
-    public SimpleExpression(){}
+    public SimpleExpression(){
+        otherTerms = new ArrayList<>();
+        operators = new ArrayList<>();
+    }
 
-    public SimpleExpression(DataType returnType, String operator, Term left, Term right) {
-        this.returnType = returnType;
-        this.operator = operator;
-        this.left = left;
-        this.right = right;
+    public SimpleExpression(Term firstTerm, ArrayList<Term> otherTerms, ArrayList<String> operators){
+        this.firstTerm = firstTerm;
+        this.otherTerms = otherTerms;
+        this.operators = operators;
+        this.returnType = firstTerm.getReturnType();
+    }
+
+    public Term getFirstTerm() {
+        return firstTerm;
+    }
+
+    public void setFirstTerm(Term firstTerm) {
+        this.firstTerm = firstTerm;
+    }
+
+    public ArrayList<Term> getOtherTerms() {
+        return otherTerms;
+    }
+
+    public void setOtherTerms(ArrayList<Term> otherTerms) {
+        this.otherTerms = otherTerms;
+    }
+
+    public ArrayList<String> getOperators() {
+        return operators;
+    }
+
+    public void setOperators(ArrayList<String> operators) {
+        this.operators = operators;
     }
 
     public DataType getReturnType() {
@@ -23,30 +52,6 @@ public class SimpleExpression extends AST{
 
     public void setReturnType(DataType returnType) {
         this.returnType = returnType;
-    }
-
-    public String getOperator() {
-        return operator;
-    }
-
-    public void setOperator(String operator) {
-        this.operator = operator;
-    }
-
-    public Term getLeft() {
-        return left;
-    }
-
-    public void setLeft(Term left) {
-        this.left = left;
-    }
-
-    public Term getRight() {
-        return right;
-    }
-
-    public void setRight(Term right) {
-        this.right = right;
     }
 
     @Override

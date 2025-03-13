@@ -120,7 +120,24 @@ public class SemanticAnalyzer {
         return false;
     }
 
+    public boolean factorIsBoolean(Factor factor){
+        return (factor.getReturnType()==DataType.BOOLEAN);
+    }
+
+    public boolean factorIsNumeric(Factor factor){
+        return (factor.getReturnType()==DataType.INTEGER || factor.getReturnType()==DataType.REAL);
+    }
+
+    public boolean termIsBoolean(Term term){
+        return term.getReturnType()==DataType.BOOLEAN;
+    }
+
+    public boolean termIsNumeric(Term term){
+        return term.getReturnType()==DataType.INTEGER || term.getReturnType()==DataType.REAL;
+    }
+
     public boolean checkFactorConsistency(Factor f1,Factor f2,String operator,int line){
+        operator=operator.toLowerCase();
         if(operator=="and"){
             return (f1.getReturnType()==DataType.BOOLEAN && f2.getReturnType()==DataType.BOOLEAN);
         }
@@ -128,6 +145,10 @@ public class SemanticAnalyzer {
             return (f1.getReturnType()==DataType.INTEGER || f1.getReturnType()==DataType.REAL)
                     && (f2.getReturnType()==DataType.INTEGER && f2.getReturnType()==DataType.REAL);
         errorLog.logSemanticError(line,"Inconsistencia de tipos "+f1.getReturnType().toString()+" "+operator+" "+f2.getReturnType().toString());
+        return false;
+    }
+
+    public boolean checkDivisionByZero(Term left,Term right, String sign, int line){
         return false;
     }
 
