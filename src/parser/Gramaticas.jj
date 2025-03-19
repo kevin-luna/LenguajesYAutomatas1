@@ -368,7 +368,7 @@ Factor Factor():
         UnsignedConstant unsignedConstant=null;
         Expression expr = null;
         Factor factor = null;
-        Token lparen=null,rparen=null;
+        Token lparen=null,rparen=null,notKeyword=null;
 }
 {
     //La gramatica comentada acepta las llamadas a funciones como un factor para una expresion
@@ -376,7 +376,7 @@ Factor Factor():
      (variable=Variable() {return new Factor(variable);}
     | unsignedConstant=UnsignedConstant() {return new Factor(unsignedConstant);}
     | <LPAREN> expr=Expression() <RPAREN> { return new Factor(expr,(lparen!=null && rparen!=null) ? true:false);}
-    | <NOT_KEYWORD> factor=Factor(){return new Factor(factor);})
+    | notKeyword=<NOT_KEYWORD> factor=Factor(){return new Factor(factor,notKeyword!=null ? true:false);})
 
     {return new Factor();}
 }

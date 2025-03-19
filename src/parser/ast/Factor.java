@@ -9,12 +9,14 @@ public class Factor extends AST{
     private boolean evalFirst;
     private Factor factor;
     private DataType returnType;
+    private Boolean negated;
 
     public enum FactorType{
         VARIABLE, UNSIGNED_CONSTANT, EXPRESSION, FACTOR;
     }
 
-    public Factor(){}
+    public Factor(){
+    }
 
     public Factor(Variable variable){
         this.variable = variable;
@@ -35,6 +37,11 @@ public class Factor extends AST{
     public Factor(Factor factor){
         this.factor = factor;
         this.returnType = factor.getReturnType();
+    }
+
+    public Factor(Factor variable, boolean negated){
+        this.variable = variable.getVariable();
+        this.negated = negated;
     }
 
     public Variable getVariable() {
