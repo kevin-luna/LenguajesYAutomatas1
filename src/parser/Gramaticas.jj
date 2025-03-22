@@ -10,6 +10,7 @@ PARSER_BEGIN(PascalParser)
 package parser;
 import java.util.ArrayList;
 import parser.ast.*;
+import parser.ast.ForStatement.ForMode;
 public class PascalParser {
     private SymbolTable symbolTable = new SymbolTable();
     private ErrorLog errorLog = new ErrorLog();
@@ -206,13 +207,20 @@ CodeBlock CodeBlock() :
 }
 
 Statement Statement() :
-{Statement stmt=null;}
+{Statement stmt=null;
+ Token keyword=null;
+ }
 {
     //La gramática comentada acepta la llamada a procedimientos y funciones
     //AssignmentStatement() | ProcedureCall() <SEMICOLON> | FunctionCall() <SEMICOLON> | IfStatement() | CaseStatement() | RepeatStatement() | WhileStatement() | ForStatement()
-    (stmt=AssignmentStatement() | stmt=ForStatement() | stmt=IfStatement() | stmt=ReadCall() | stmt=ReadlnCall() | stmt=WhileStatement() | stmt=WriteCall() | stmt=WritelnCall())
-    {return stmt;}
+    ( keyword=<BREAK_KEYWORD> <SEMICOLON> | keyword=<CONTINUE_KEYWORD> <SEMICOLON> | stmt=AssignmentStatement() | stmt=ForStatement() | stmt=IfStatement() | stmt=ReadCall() | stmt=ReadlnCall() | stmt=WhileStatement() | stmt=WriteCall() | stmt=WritelnCall())
+    {
+        if(keyword!=null && !semanticAnalyzer.checkInsideLoop()) errorLog.logSemanticError(keyword.beginLine,"Sentencia "+keyword.image+" fuera de un ciclo");
+        return stmt;
+    }
 }
+
+
 
 Token TypeIdentifier():
 {
@@ -316,8 +324,9 @@ SimpleExpression SimpleExpression():
                     simpleExpressionIsValid=false;
                 }
             }else{
-                if(!semanticAnalyzer.termIsNumeric(prev) || !semanticAnalyzer.termIsNumeric(curr)){
-                    errorLog.logSemanticError(op.beginLine,"No se puede aplicar la operacion "+op.image+" a tipos no numericos");
+                if(!(semanticAnalyzer.termIsNumeric(prev) && semanticAnalyzer.termIsNumeric(curr))
+                && !(semanticAnalyzer.termIsString(prev) && semanticAnalyzer.termIsString(curr))){
+                    errorLog.logSemanticError(op.beginLine,"No se puede aplicar la operacion "+op.image+" a tipos "+prev.getReturnType()+","+curr.getReturnType());
                     simpleExpressionIsValid=false;
                 }
             }
@@ -591,6 +600,9 @@ IfStatement IfStatement():
         semanticStack.pushBlock(BlockType.IF_BLOCK);
         Expression expr=null;
         Token ifKeyword=null;
+        Statement stmt=null;
+        CodeBlock codeBlock=null;
+        ElseStatement elseStmt=null;
 }
 {
     ifKeyword=<IF_KEYWORD> expr=Expression()
@@ -600,10 +612,16 @@ IfStatement IfStatement():
             return new IfStatement();
         }
     }
-     <THEN_KEYWORD> (Statement() | CodeBlock() <SEMICOLON>)  (ElseStatement())?
+     <THEN_KEYWORD> (stmt=Statement() | codeBlock=CodeBlock() <SEMICOLON>)  (elseStmt=ElseStatement())?
      {
+
         semanticStack.popBlock();
-        return new IfStatement();
+        if(elseStmt==null){
+            if(stmt!=null) return new IfStatement(expr,stmt);
+            return new IfStatement(expr,codeBlock);
+        }
+        if(stmt!=null) return new IfStatement(expr,stmt,elseStmt);
+        return new IfStatement(expr,codeBlock,elseStmt);
     }
 }
 
@@ -629,9 +647,11 @@ ElseStatement ElseStatement():
 
 WhileStatement WhileStatement():
 {
-        semanticStack.pushBlock(BlockType.WHILE_BLOCK);
+    semanticStack.pushBlock(BlockType.WHILE_BLOCK);
     Expression expr=null;
     Token whileKeyword=null;
+    Statement stmt=null;
+    CodeBlock codeBlock=null;
 }
 {
     whileKeyword=<WHILE_KEYWORD> expr=Expression()
@@ -641,10 +661,11 @@ WhileStatement WhileStatement():
             return new WhileStatement();
         }
     }
-     <DO_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )
+     <DO_KEYWORD> (stmt=Statement() | codeBlock=CodeBlock() <SEMICOLON> )
      {
         semanticStack.popBlock();
-        return new WhileStatement();
+        if(stmt!=null)return new WhileStatement(expr,stmt);
+        return new WhileStatement(expr,codeBlock);
     }
 }
 
@@ -657,15 +678,30 @@ WhileStatement WhileStatement():
 ForStatement ForStatement():
 {
         semanticStack.pushBlock(BlockType.FOR_BLOCK);
-        Expression expr=null;
-        Token forKeyword=null,identifier=null;
+        Expression expr=null,expr2=null;
+        Token forKeyword=null;
+        Variable variable = null;
+        Token mode = null;
+        Statement stmt=null;
+        CodeBlock codeBlock=null;
 }
 {
-    forKeyword=<FOR_KEYWORD> identifier=<IDENTIFIER> <ASSIGN_OP> Expression() (<DOWNTO_KEYWORD> | <TO_KEYWORD> ) Expression() <DO_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )
+    forKeyword=<FOR_KEYWORD> variable=Variable() <ASSIGN_OP> expr=Expression() (mode=<DOWNTO_KEYWORD> | mode=<TO_KEYWORD> ) expr2=Expression() <DO_KEYWORD> (stmt=Statement() | codeBlock=CodeBlock() <SEMICOLON> )
     {
+    if(!semanticAnalyzer.checkConstReassignment(variable.getName())
+    && variable.getDataType()==DataType.INTEGER
+    && symbolTable.getSymbolType(variable.getName())!=SymbolType.ARRAY
+    && semanticAnalyzer.checkAssignment(variable,expr)
+    && expr2.getReturnType()!=DataType.INTEGER
+    ){
+        ForMode forMode=mode.image.toLowerCase()=="to" ? ForMode.TO:ForMode.DOWNTO;
         semanticStack.popBlock();
-        return new ForStatement();
+        if(stmt!=null) return new ForStatement(variable,expr,forMode,expr2,stmt);
+        return new ForStatement(variable,expr,forMode,expr2,codeBlock);
     }
+    semanticStack.popBlock();
+    return new ForStatement();
+}
 }
 
 ReadlnCall ReadlnCall():

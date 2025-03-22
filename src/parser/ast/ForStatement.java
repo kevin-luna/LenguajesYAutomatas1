@@ -8,7 +8,7 @@ public class ForStatement extends Statement{
     private Statement statement;
     private CodeBlock codeBlock;
 
-    private enum ForMode{
+    public enum ForMode{
         TO,DOWNTO;
     }
 

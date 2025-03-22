@@ -3,6 +3,7 @@
 package parser;
 import java.util.ArrayList;
 import parser.ast.*;
+import parser.ast.ForStatement.ForMode;
 
 /** Token Manager. */
 @SuppressWarnings ("unused")

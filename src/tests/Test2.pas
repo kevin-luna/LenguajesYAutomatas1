@@ -1,8 +1,10 @@
 program Hello;
 var
+    nombre: string;
     flag: integer;
     ac: integer;
 begin
+    nombre := 'Kevin'+'Luna';
     ac:=0;
     while true do
     begin

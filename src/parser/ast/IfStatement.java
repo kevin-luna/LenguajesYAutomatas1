@@ -4,7 +4,7 @@ public class IfStatement extends Statement{
 
     private Expression condition;
     private Statement statement;
-    private Block block;
+    private CodeBlock block;
     private ElseStatement elseStatement;
 
     public IfStatement(){}
@@ -20,12 +20,12 @@ public class IfStatement extends Statement{
         this.elseStatement = elseStatement;
     }
 
-    public IfStatement(Expression condition, Block block){
+    public IfStatement(Expression condition, CodeBlock block){
         this.condition = condition;
         this.block = block;
     }
 
-    public IfStatement(Expression condition, Block block, ElseStatement elseStatement){
+    public IfStatement(Expression condition, CodeBlock block, ElseStatement elseStatement){
         this.condition = condition;
         this.block = block;
         this.elseStatement = elseStatement;
@@ -47,11 +47,11 @@ public class IfStatement extends Statement{
         this.statement = statement;
     }
 
-    public Block getBlock() {
+    public CodeBlock getCodeBlock() {
         return block;
     }
 
-    public void setBlock(Block block) {
+    public void setBlock(CodeBlock block) {
         this.block = block;
     }
 

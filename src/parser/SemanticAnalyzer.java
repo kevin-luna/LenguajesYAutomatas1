@@ -136,6 +136,10 @@ public class SemanticAnalyzer {
         return term.getReturnType()==DataType.INTEGER || term.getReturnType()==DataType.REAL;
     }
 
+    public boolean termIsString(Term term){
+        return term.getReturnType()==DataType.STRING;
+    }
+
     public boolean checkFactorConsistency(Factor f1,Factor f2,String operator,int line){
         operator=operator.toLowerCase();
         if(operator=="and"){
@@ -146,6 +150,10 @@ public class SemanticAnalyzer {
                     && (f2.getReturnType()==DataType.INTEGER && f2.getReturnType()==DataType.REAL);
         errorLog.logSemanticError(line,"Inconsistencia de tipos "+f1.getReturnType().toString()+" "+operator+" "+f2.getReturnType().toString());
         return false;
+    }
+
+    public boolean checkInsideLoop(){
+        return semanticStack.lookBlock(BlockType.WHILE_BLOCK) || semanticStack.lookBlock(BlockType.FOR_BLOCK);
     }
 
     public boolean checkDivisionByZero(Term left,Term right, String sign, int line){
