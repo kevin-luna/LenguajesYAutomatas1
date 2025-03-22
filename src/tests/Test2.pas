@@ -8,6 +8,6 @@ begin
     begin
         if ac=10 then break;
         writeln ('Hello World');
-        ac := ac + 1;
+        ac := ac + 1 div 5;
     end;
 end.

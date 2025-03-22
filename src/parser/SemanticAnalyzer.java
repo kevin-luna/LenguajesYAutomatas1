@@ -112,7 +112,7 @@ public class SemanticAnalyzer {
         }
         errorLog.logSemanticError(
                 line,
-                "No se puede comparar un tipo"
+                "No se puede comparar un tipo "
                 +expr1.getReturnType().toString()
                 +" con un tipo "
                 +expr2.getReturnType().toString()

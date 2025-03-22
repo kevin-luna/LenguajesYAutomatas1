@@ -138,12 +138,15 @@ Program Program() :
 //<USES_KEYWORD> <IDENTIFIER> <SEMICOLON>
 //}
 
-void Block():
-{}
+Block Block():
+{
+   Block block = null;
+}
 {
     //La gramatica comentada soporta la creacion de procedimientos y funciones
     //CodeBlock() | ConstBlock()  | VarBlock() | Procedure() | Function()
-    CodeBlock() | ConstBlock()  | VarBlock()
+    block=CodeBlock() | block=ConstBlock()  | block=VarBlock()
+    {return block;}
 }
 
 VarBlock VarBlock() :
@@ -156,7 +159,6 @@ VarBlock VarBlock() :
 
     {
         this.semanticStack.popBlock();
-
         return new VarBlock(variables);
     }
 }
@@ -192,20 +194,24 @@ ConstBlock ConstBlock() :
 }
 }
 
-void CodeBlock() :
-{}
+CodeBlock CodeBlock() :
+{
+
+}
 {
   <BEGIN_KEYWORD>
   (Statement())*
   <END_KEYWORD>
+  {return new CodeBlock();}
 }
 
-void Statement() :
-{}
+Statement Statement() :
+{Statement stmt=null;}
 {
     //La gramática comentada acepta la llamada a procedimientos y funciones
     //AssignmentStatement() | ProcedureCall() <SEMICOLON> | FunctionCall() <SEMICOLON> | IfStatement() | CaseStatement() | RepeatStatement() | WhileStatement() | ForStatement()
-    AssignmentStatement() | ForStatement() | IfStatement() | ReadCall() | ReadlnCall() | WhileStatement() | WriteCall() | WritelnCall()
+    (stmt=AssignmentStatement() | stmt=ForStatement() | stmt=IfStatement() | stmt=ReadCall() | stmt=ReadlnCall() | stmt=WhileStatement() | stmt=WriteCall() | stmt=WritelnCall())
+    {return stmt;}
 }
 
 Token TypeIdentifier():
@@ -561,7 +567,7 @@ typeIdentifier=TypeIdentifier() <SEMICOLON>
 // <FUNCTION_KEYWORD> <IDENTIFIER> ParamList() <COLON> Type() <SEMICOLON> ( ConstBlock() | VarBlock() )* Block() <SEMICOLON>
 //}
 
-void AssignmentStatement():
+AssignmentStatement AssignmentStatement():
 {
     Variable variable=null;
     Expression expression=null;
@@ -576,17 +582,18 @@ void AssignmentStatement():
             }
             return new AssignmentStatement();
         }
-        return new AssignmentStatement(variable,assignment);
+        return new AssignmentStatement(variable,expression);
     }
 }
 
 IfStatement IfStatement():
 {
+        semanticStack.pushBlock(BlockType.IF_BLOCK);
         Expression expr=null;
         Token ifKeyword=null;
 }
 {
-    <IF_KEYWORD> expr=Expression()
+    ifKeyword=<IF_KEYWORD> expr=Expression()
     {
         if(expr.getReturnType()!=DataType.BOOLEAN){
             errorLog.logSemanticError(ifKeyword.beginLine, "Se asigno una expresion no BOOLEANA al bloque IF");
@@ -594,15 +601,22 @@ IfStatement IfStatement():
         }
     }
      <THEN_KEYWORD> (Statement() | CodeBlock() <SEMICOLON>)  (ElseStatement())?
-     {return new IfStatement();}
+     {
+        semanticStack.popBlock();
+        return new IfStatement();
+    }
 }
 
 ElseStatement ElseStatement():
-{Statement statement=null;CodeBlock codeBlock=null;}
+{
+        semanticStack.pushBlock(BlockType.ELSE_BLOCK);
+        Statement statement=null;CodeBlock codeBlock=null;
+}
 {
     <ELSE_KEYWORD> (statement=Statement() | codeBlock=CodeBlock() <SEMICOLON> )
     {
-        if(statement!=null)return new ElseStatemnent(statement);
+        if(statement!=null)return new ElseStatement(statement);
+        semanticStack.popBlock();
         return new ElseStatement(codeBlock);
     }
 }
@@ -615,6 +629,7 @@ ElseStatement ElseStatement():
 
 WhileStatement WhileStatement():
 {
+        semanticStack.pushBlock(BlockType.WHILE_BLOCK);
     Expression expr=null;
     Token whileKeyword=null;
 }
@@ -627,6 +642,10 @@ WhileStatement WhileStatement():
         }
     }
      <DO_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )
+     {
+        semanticStack.popBlock();
+        return new WhileStatement();
+    }
 }
 
 //void RepeatStatement():
@@ -637,26 +656,33 @@ WhileStatement WhileStatement():
 
 ForStatement ForStatement():
 {
+        semanticStack.pushBlock(BlockType.FOR_BLOCK);
         Expression expr=null;
         Token forKeyword=null,identifier=null;
 }
 {
     forKeyword=<FOR_KEYWORD> identifier=<IDENTIFIER> <ASSIGN_OP> Expression() (<DOWNTO_KEYWORD> | <TO_KEYWORD> ) Expression() <DO_KEYWORD> (Statement() | CodeBlock() <SEMICOLON> )
+    {
+        semanticStack.popBlock();
+        return new ForStatement();
+    }
 }
 
-void ReadlnCall():
+ReadlnCall ReadlnCall():
 {}
 {
     <READLN_KEYWORD> (<LPAREN> (Expression() (<COMMA> Expression() )* )? <RPAREN>)? <SEMICOLON>
+    {return new ReadlnCall();}
 }
 
-void ReadCall():
+ReadCall ReadCall():
 {}
 {
     <READ_KEYWORD> (<LPAREN> (Expression() (<COMMA> Expression() )* )? <RPAREN>)? <SEMICOLON>
+    {return new ReadCall();}
 }
 
-void WritelnCall():
+WritelnCall WritelnCall():
 {
     Token lparen=null,semicolon=null,rparen=null;
 }
@@ -676,9 +702,10 @@ void WritelnCall():
             }
             throw paex;
         }
+    {return new WritelnCall();}
 }
 
-void WriteCall():
+WriteCall WriteCall():
 {
     Token t=null;
 }
@@ -694,4 +721,5 @@ void WriteCall():
         }
         throw paex;
     }
+    {return new WriteCall();}
 }

@@ -29,16 +29,12 @@ public class DataTypes {
     public static DataType getDataType(String dataType){
         DataType dt = null;
         switch (dataType){
-            case "integer":
-                dt = DataType.INTEGER;
-            case "real":
-                dt = DataType.REAL;
-            case "char":
-                dt = DataType.CHAR;
-            case "boolean":
-                dt = DataType.BOOLEAN;
-            case "string":
-                dt = DataType.STRING;
+            case "integer" -> dt = DataType.INTEGER;
+            case "real" -> dt = DataType.REAL;
+            case "char" -> dt = DataType.CHAR;
+            case "boolean" -> dt = DataType.BOOLEAN;
+            case "string" -> dt = DataType.STRING;
+            default -> dt = DataType.UNKNOWN;
         }
         return dt;
     }

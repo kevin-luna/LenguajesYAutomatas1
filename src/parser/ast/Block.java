@@ -8,6 +8,8 @@ public class Block extends AST {
         VAR_BLOCK,CONST_BLOCK,CODE_BLOCK;
     }
 
+    public Block(){}
+
     public Block(BlockType blockType) {
         this.blockType = blockType;
     }
