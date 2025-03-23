@@ -28,6 +28,11 @@ public class Block extends AST {
     }
 
     @Override
+    public void generateIntermediateCode() {
+
+    }
+
+    @Override
     public void generateCode() {
 
     }

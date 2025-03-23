@@ -11,4 +11,12 @@ public class CodeBlock extends Block{
         super(BlockType.CODE_BLOCK);
         this.statements = statements;
     }
+
+    public ArrayList<Statement> getStatements() {
+        return statements;
+    }
+
+    public void setStatements(ArrayList<Statement> statements) {
+        this.statements = statements;
+    }
 }

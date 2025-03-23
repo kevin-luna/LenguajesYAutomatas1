@@ -197,25 +197,24 @@ ConstBlock ConstBlock() :
 
 CodeBlock CodeBlock() :
 {
-
+    ArrayList<Statement> statements = new ArrayList<>();
+    Statement tmp=null;
 }
 {
   <BEGIN_KEYWORD>
-  (Statement())*
+  (tmp=Statement() {statements.add(tmp);})*
   <END_KEYWORD>
-  {return new CodeBlock();}
+  {return new CodeBlock(statements);}
 }
 
 Statement Statement() :
 {Statement stmt=null;
- Token keyword=null;
  }
 {
     //La gramática comentada acepta la llamada a procedimientos y funciones
     //AssignmentStatement() | ProcedureCall() <SEMICOLON> | FunctionCall() <SEMICOLON> | IfStatement() | CaseStatement() | RepeatStatement() | WhileStatement() | ForStatement()
-    ( keyword=<BREAK_KEYWORD> <SEMICOLON> | keyword=<CONTINUE_KEYWORD> <SEMICOLON> | stmt=AssignmentStatement() | stmt=ForStatement() | stmt=IfStatement() | stmt=ReadCall() | stmt=ReadlnCall() | stmt=WhileStatement() | stmt=WriteCall() | stmt=WritelnCall())
+    ( stmt=BreakStatement() | stmt=ContinueStatement() | stmt=AssignmentStatement() | stmt=ForStatement() | stmt=IfStatement() | stmt=ReadCall() | stmt=ReadlnCall() | stmt=WhileStatement() | stmt=WriteCall() | stmt=WritelnCall())
     {
-        if(keyword!=null && !semanticAnalyzer.checkInsideLoop()) errorLog.logSemanticError(keyword.beginLine,"Sentencia "+keyword.image+" fuera de un ciclo");
         return stmt;
     }
 }
@@ -708,6 +707,34 @@ ForStatement ForStatement():
     semanticStack.popBlock();
     return new ForStatement();
 }
+}
+
+BreakStatement BreakStatement():
+{Token keyword=null;}
+{
+    keyword=<BREAK_KEYWORD> <SEMICOLON>
+
+    {
+        if(keyword!=null && !semanticAnalyzer.checkInsideLoop()){
+            errorLog.logSemanticError(keyword.beginLine,"Sentencia "+keyword.image+" fuera de un ciclo");
+            return null;
+        }
+        return new BreakStatement();
+    }
+}
+
+ContinueStatement ContinueStatement():
+{Token keyword=null;}
+{
+    keyword=<CONTINUE_KEYWORD> <SEMICOLON>
+
+    {
+        if(keyword!=null && !semanticAnalyzer.checkInsideLoop()){
+            errorLog.logSemanticError(keyword.beginLine,"Sentencia "+keyword.image+" fuera de un ciclo");
+            return null;
+        }
+        return new ContinueStatement();
+    }
 }
 
 ReadlnCall ReadlnCall():
