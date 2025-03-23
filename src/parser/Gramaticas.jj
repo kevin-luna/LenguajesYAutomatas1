@@ -391,7 +391,13 @@ Factor Factor():
      (variable=Variable() {return new Factor(variable);}
     | unsignedConstant=UnsignedConstant() {return new Factor(unsignedConstant);}
     | <LPAREN> expr=Expression() <RPAREN> { return new Factor(expr,(lparen!=null && rparen!=null) ? true:false);}
-    | notKeyword=<NOT_KEYWORD> factor=Factor(){return new Factor(factor,notKeyword!=null ? true:false);})
+    | notKeyword=<NOT_KEYWORD> factor=Factor(){
+    if(notKeyword!=null && factor.getReturnType()!=DataType.BOOLEAN){
+        errorLog.logSemanticError(notKeyword.beginLine,"No se puede aplicar el operador NOT a un "+factor.getReturnType());
+        return new Factor();
+    }
+    return new Factor(factor,notKeyword!=null ? true:false);
+})
 
     {return new Factor();}
 }

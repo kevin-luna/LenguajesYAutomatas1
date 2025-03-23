@@ -2,6 +2,8 @@ package parser.ast;
 
 import parser.DataType;
 
+import javax.xml.crypto.Data;
+
 public class Factor extends AST{
     private Variable variable;
     private UnsignedConstant unsignedConstant;
@@ -42,6 +44,7 @@ public class Factor extends AST{
     public Factor(Factor variable, boolean negated){
         this.variable = variable.getVariable();
         this.negated = negated;
+        this.returnType = DataType.BOOLEAN;
     }
 
     public Variable getVariable() {
