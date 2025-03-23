@@ -1,5 +1,9 @@
 package parser.ast;
 
+import parser.Quadruple;
+
+import java.util.ArrayList;
+
 public class ForStatement extends Statement{
     private Variable variable;
     private Expression expression1;
@@ -81,6 +85,11 @@ public class ForStatement extends Statement{
     @Override
     public void traverse() {
 
+    }
+
+    @Override
+    public ArrayList<Quadruple> generateIntermediateCode() {
+        return null;
     }
 
     @Override

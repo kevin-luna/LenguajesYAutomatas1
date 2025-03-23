@@ -1,5 +1,9 @@
 package parser.ast;
 
+import parser.Quadruple;
+
+import java.util.ArrayList;
+
 public class Program extends AST {
     private String identifier;
     private VarBlock varBlock;
@@ -52,8 +56,8 @@ public class Program extends AST {
     }
 
     @Override
-    public void generateIntermediateCode() {
-
+    public ArrayList<Quadruple> generateIntermediateCode() {
+        return null;
     }
 
     @Override

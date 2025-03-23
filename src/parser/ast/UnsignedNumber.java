@@ -1,6 +1,9 @@
 package parser.ast;
 
 import parser.DataType;
+import parser.Quadruple;
+
+import java.util.ArrayList;
 
 public class UnsignedNumber extends UnsignedConstant{
 
@@ -13,6 +16,10 @@ public class UnsignedNumber extends UnsignedConstant{
     @Override
     public void traverse() {
 
+    }
+
+    public ArrayList<Quadruple> generateIntermediateCode() {
+        return null;
     }
 
     @Override

@@ -1,8 +1,9 @@
 package parser.ast;
 
 import parser.DataType;
+import parser.Quadruple;
 
-import javax.xml.crypto.Data;
+import java.util.ArrayList;
 
 public class Factor extends AST{
     private Variable variable;
@@ -101,8 +102,8 @@ public class Factor extends AST{
     }
 
     @Override
-    public void generateIntermediateCode() {
-
+    public ArrayList<Quadruple> generateIntermediateCode() {
+        return null;
     }
 
     @Override

@@ -1,5 +1,7 @@
 package parser.ast;
 
+import parser.Quadruple;
+
 import java.util.ArrayList;
 
 public class VarBlock extends Block{
@@ -13,4 +15,12 @@ public class VarBlock extends Block{
         super(BlockType.VAR_BLOCK);
         this.variables = variables;
     }
+
+    @Override
+    public ArrayList<Quadruple> generateIntermediateCode() {
+        return null;
+    }
+
+    @Override
+    public void generateCode() {}
 }

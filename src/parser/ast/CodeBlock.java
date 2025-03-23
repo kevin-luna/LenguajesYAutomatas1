@@ -1,5 +1,7 @@
 package parser.ast;
 
+import parser.Quadruple;
+
 import java.util.ArrayList;
 
 public class CodeBlock extends Block{
@@ -14,6 +16,10 @@ public class CodeBlock extends Block{
 
     public ArrayList<Statement> getStatements() {
         return statements;
+    }
+
+    public ArrayList<Quadruple> generateIntermediateCode(){
+        return null;
     }
 
     public void setStatements(ArrayList<Statement> statements) {

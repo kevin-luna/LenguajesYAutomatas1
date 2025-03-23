@@ -2,9 +2,6 @@ package parser;
 
 import parser.ast.*;
 
-import javax.xml.crypto.Data;
-import java.util.Stack;
-
 public class SemanticAnalyzer {
     private SymbolTable symbolTable;
     private SemanticStack semanticStack;

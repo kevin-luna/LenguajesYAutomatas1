@@ -1,6 +1,9 @@
 package parser.ast;
 
 import parser.DataType;
+import parser.Quadruple;
+
+import java.util.ArrayList;
 
 public class ConstDeclaration extends VariableDeclaration {
 
@@ -15,6 +18,12 @@ public class ConstDeclaration extends VariableDeclaration {
     @Override
     public void traverse() {
 
+    }
+
+    @Override
+    public ArrayList<Quadruple> generateIntermediateCode(){
+
+        return null;
     }
 
     @Override

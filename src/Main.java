@@ -1,11 +1,7 @@
-import java.io.*;
-import java.io.FileInputStream;
+import parser.*;
 
-import parser.PascalParser;
-import parser.ParseException;
-import parser.PascalParserTokenManager;
-import parser.SimpleCharStream;
-import parser.TokenMgrError;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 
 public class Main {

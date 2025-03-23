@@ -1,6 +1,9 @@
 package parser.ast;
 
 import parser.DataType;
+import parser.Quadruple;
+
+import java.util.ArrayList;
 
 public class Constant extends UnsignedConstant{
     private String sign;
@@ -21,6 +24,10 @@ public class Constant extends UnsignedConstant{
     @Override
     public void traverse() {
 
+    }
+
+    public ArrayList<Quadruple> generateIntermediateCode(){
+        return null;
     }
 
     @Override

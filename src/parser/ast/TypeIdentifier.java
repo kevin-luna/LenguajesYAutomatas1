@@ -1,5 +1,9 @@
 package parser.ast;
 
+import parser.Quadruple;
+
+import java.util.ArrayList;
+
 public class TypeIdentifier extends AST {
     @Override
     public void traverse() {
@@ -7,8 +11,8 @@ public class TypeIdentifier extends AST {
     }
 
     @Override
-    public void generateIntermediateCode() {
-
+    public ArrayList<Quadruple> generateIntermediateCode() {
+        return null;
     }
 
     @Override

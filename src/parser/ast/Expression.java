@@ -1,6 +1,9 @@
 package parser.ast;
 
 import parser.DataType;
+import parser.Quadruple;
+
+import java.util.ArrayList;
 
 public class Expression extends AST{
     private DataType returnType;
@@ -58,8 +61,8 @@ public class Expression extends AST{
     }
 
     @Override
-    public void generateIntermediateCode() {
-
+    public ArrayList<Quadruple> generateIntermediateCode() {
+        return null;
     }
 
     @Override

@@ -2,8 +2,6 @@ package parser.ast;
 
 import parser.DataType;
 
-import java.util.ArrayList;
-
 public class ArrayDeclaration extends VariableDeclaration{
 
     private int length;
