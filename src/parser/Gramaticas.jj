@@ -711,27 +711,35 @@ ForStatement ForStatement():
 }
 
 ReadlnCall ReadlnCall():
-{}
 {
-    <READLN_KEYWORD> (<LPAREN> (Expression() (<COMMA> Expression() )* )? <RPAREN>)? <SEMICOLON>
-    {return new ReadlnCall();}
+ ArrayList<Variable> variables = new ArrayList<>();
+ Variable tmp = null;
+ }
+{
+    <READLN_KEYWORD> (<LPAREN> (tmp=Variable() {variables.add(tmp);}(<COMMA> tmp=Variable() {variables.add(tmp);} )* )? <RPAREN>)? <SEMICOLON>
+    {return new ReadlnCall(variables);}
 }
 
 ReadCall ReadCall():
-{}
 {
-    <READ_KEYWORD> (<LPAREN> (Expression() (<COMMA> Expression() )* )? <RPAREN>)? <SEMICOLON>
-    {return new ReadCall();}
+    ArrayList<Variable> variables = new ArrayList<>();
+    Variable tmp=null;
+ }
+{
+    <READ_KEYWORD> (<LPAREN> (tmp=Variable() {variables.add(tmp);} (<COMMA> tmp=Variable() {variables.add(tmp);} )* )? <RPAREN>)? <SEMICOLON>
+    {return new ReadCall(variables);}
 }
 
 WritelnCall WritelnCall():
 {
     Token lparen=null,semicolon=null,rparen=null;
+    ArrayList<Expression> expressions = new ArrayList<>();
+    Expression tmp = null;
 }
 {
         <WRITELN_KEYWORD>
         try{
-            (lparen=<LPAREN> (Expression() (<COMMA> Expression() )* )? rparen=<RPAREN>)? semicolon=<SEMICOLON>
+            (lparen=<LPAREN> (tmp=Expression() {expressions.add(tmp);} (<COMMA> tmp=Expression() {expressions.add(tmp);} )* )? rparen=<RPAREN>)? semicolon=<SEMICOLON>
         }catch(ParseException paex){
             if(lparen==null){
                 errorLog.logSyntaxError(paex.currentToken.endLine,"Se esperaba un \"(\" despues de writeln");
@@ -744,15 +752,17 @@ WritelnCall WritelnCall():
             }
             throw paex;
         }
-    {return new WritelnCall();}
+    {return new WritelnCall(expressions);}
 }
 
 WriteCall WriteCall():
 {
     Token t=null;
+    ArrayList<Expression> expressions = new ArrayList<>();
+    Expression tmp = null;
 }
 {
-    <WRITE_KEYWORD> (<LPAREN> (Expression() (<COMMA> Expression() )* )? <RPAREN>)?
+    <WRITE_KEYWORD> (<LPAREN> (tmp=Expression() {expressions.add(tmp);} (<COMMA> tmp=Expression() {expressions.add(tmp);} )* )? <RPAREN>)?
     try
     {
         t=<SEMICOLON>
@@ -763,5 +773,5 @@ WriteCall WriteCall():
         }
         throw paex;
     }
-    {return new WriteCall();}
+    {return new WriteCall(expressions);}
 }
