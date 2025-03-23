@@ -156,7 +156,7 @@ VarBlock VarBlock() :
     ArrayList<VariableDeclaration> variables= null;
 }
 {
-    <VAR_KEYWORD> (variables=VariableDeclaration())*
+    <VAR_KEYWORD> (variables=VariableDeclaration(){variables.addAll(variables);})*
 
     {
         this.semanticStack.popBlock();
