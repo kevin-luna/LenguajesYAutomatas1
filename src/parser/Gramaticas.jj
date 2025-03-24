@@ -18,7 +18,8 @@ public class PascalParser {
     private SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(symbolTable,semanticStack,errorLog);
 
     public void printErrors(){
-        errorLog.printLog();
+        if(!semanticStack.isEmpty()) errorLog.printLog();
+        else System.out.println("No se encontraron errores");
     }
 }
 PARSER_END(PascalParser)
@@ -170,24 +171,25 @@ ConstBlock ConstBlock() :
     Token identifier=null,typeIdentifier=null;
     Constant constant=null;
      String constName = "";
+     SymbolEntry newConstant = null;
      ArrayList<ConstDeclaration> constants = new ArrayList();
 }
 {
     <CONST_KEYWORD> (
       identifier=<IDENTIFIER> <COLON> typeIdentifier=TypeIdentifier() <EQ_OP> constant=Constant() <SEMICOLON>
       {
+            SymbolEntry newConstant = new SymbolEntry(
+                                                    identifier.image,
+                                                    constant.getValue(),
+                                                    identifier.beginLine,
+                                                    SymbolType.CONSTANT,
+                                                    DataTypes.getDataType(typeIdentifier.image),
+                                                    1,
+                                                    0
+                              );
               if(!semanticAnalyzer.checkConstantRedefinition(newConstant)){
-                  SymbolEntry newConstant = new SymbolEntry(
-                                        identifier.image,
-                                        constant.getValue(),
-                                        identifier.beginLine,
-                                        SymbolType.CONSTANT,
-                                        DataTypes.getDataType(typeIdentifier.image),
-                                        1,
-                                        0
-                  );
-
-                    constants.add(new ConstDeclaration(identifier.image,DataTypes.getDataType(typeIdentifier.image)));
+                  symbolTable.addSymbol(newConstant);
+                  constants.add(new ConstDeclaration(identifier.image,DataTypes.getDataType(typeIdentifier.image)));
               }
 
           }

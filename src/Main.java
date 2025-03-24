@@ -16,7 +16,9 @@ public class Main {
         try{
             parser = new PascalParser(new PascalParserTokenManager(new SimpleCharStream(new FileInputStream(ruta))));
             parser.Program();
-            System.out.println("No se encontraron errores de sintaxis");
+            if(parser!=null){
+                parser.printErrors();
+            }
         }catch(ParseException e){
             System.out.println("Error: " + e.getMessage());
             //e.printStackTrace();
@@ -25,8 +27,6 @@ public class Main {
         }catch (TokenMgrError e){
             System.out.println("Error: " + e.getMessage());
         }
-        if(parser!=null){
-            parser.printErrors();
-        }
+
     }
 }
