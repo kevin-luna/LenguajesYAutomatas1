@@ -1,6 +1,8 @@
 package parser.ast;
 
+import parser.IRInstruction;
 import parser.Quadruple;
+import parser.TempLblGenerator;
 
 import java.util.ArrayList;
 
@@ -74,7 +76,14 @@ public class IfStatement extends Statement{
 
     @Override
     public ArrayList<Quadruple> generateIntermediateCode() {
-        return null;
+        ArrayList<Quadruple> ir = condition.generateIntermediateCode();
+        ir.add(new Quadruple(IRInstruction.IF, ir.getLast().getResult(), TempLblGenerator.getLastInstance(),null));
+        ir.add(new Quadruple(IRInstruction.LBL,TempLblGenerator.getNewInstance()));
+        if(statement!=null) ir.addAll(statement.generateIntermediateCode());
+        else ir.addAll(block.generateIntermediateCode());
+        ir.add(new Quadruple(IRInstruction.ENDL,TempLblGenerator.getLastInstance()));
+        if(elseStatement!=null) ir.addAll(elseStatement.generateIntermediateCode());
+        return ir;
     }
 
     @Override

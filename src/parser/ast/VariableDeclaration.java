@@ -1,6 +1,7 @@
 package parser.ast;
 
 import parser.DataType;
+import parser.IRInstruction;
 import parser.Quadruple;
 
 import java.util.ArrayList;
@@ -24,7 +25,6 @@ public class VariableDeclaration extends AST{
 
     @Override
     public ArrayList<Quadruple> generateIntermediateCode() {
-
         return null;
     }
 

@@ -22,14 +22,21 @@ public class SemanticAnalyzer {
         return new VariableDeclaration(symbol.getDataType(),symbol.getName());
     }
 
-    public ArrayDeclaration checkArrayRedefinition(SymbolEntry symbol){
-        if(checkSymbolRedefinition(symbol))return null;
-        return new ArrayDeclaration(symbol.getName(),symbol.getDataType(),symbol.getLen(),symbol.getDimension());
+    public boolean checkArrayRedefinition(SymbolEntry symbol){
+        if(symbolTable.getSymbol(symbol.getName()) == null){
+            if(symbolTable.getSymbolType(symbol.getName()) != SymbolType.ARRAY){
+                errorLog.logSemanticError(symbol.getDefLine(),symbol.getName()+" ya existe y no es un arreglo");
+                return true;
+            }
+            errorLog.logSemanticError(symbol.getDefLine(),"Redefinicion del arreglo "+symbol.getName());
+            return true;
+        }
+
+        return false;
     }
 
-    public ConstDeclaration checkConstantRedefinition(SymbolEntry symbol){
-        if(checkSymbolRedefinition(symbol))return null;
-        return new ConstDeclaration(symbol.getName(),symbol.getDataType());
+    public boolean checkConstantRedefinition(SymbolEntry symbol){
+        return checkSymbolRedefinition(symbol);
     }
 
     public boolean checkConstReassignment(String name){

@@ -176,16 +176,20 @@ ConstBlock ConstBlock() :
     <CONST_KEYWORD> (
       identifier=<IDENTIFIER> <COLON> typeIdentifier=TypeIdentifier() <EQ_OP> constant=Constant() <SEMICOLON>
       {
-              SymbolEntry newConstant = new SymbolEntry(
-                      identifier.image,
-                      "value",
-                      identifier.beginLine,
-                      SymbolType.CONSTANT,
-                      DataTypes.getDataType(typeIdentifier.image),
-                      1,
-                      0
-              );
-              semanticAnalyzer.checkConstantRedefinition(newConstant);
+              if(!semanticAnalyzer.checkConstantRedefinition(newConstant)){
+                  SymbolEntry newConstant = new SymbolEntry(
+                                        identifier.image,
+                                        constant.getValue(),
+                                        identifier.beginLine,
+                                        SymbolType.CONSTANT,
+                                        DataTypes.getDataType(typeIdentifier.image),
+                                        1,
+                                        0
+                  );
+
+                    constants.add(new ConstDeclaration(identifier.image,DataTypes.getDataType(typeIdentifier.image)));
+              }
+
           }
     )*
 
@@ -498,7 +502,6 @@ ArrayList<VariableDeclaration> VariableDeclaration():
     this.semanticStack.pushBlock(BlockType.VAR_BLOCK);
     Token name=null,typeIdentifier=null,arrayKeyword=null,arrayLen=null;
 
-    String varValue = "";
     int varDefLine;
     SymbolType varSymbolType = SymbolType.VARIABLE;
     DataType varDataType = null;
@@ -526,11 +529,11 @@ typeIdentifier=TypeIdentifier() <SEMICOLON>
     if(arrayKeyword!=null){
         varSymbolType = SymbolType.ARRAY;
         varLen=Integer.parseInt(arrayLen.image);
-        tmp = new SymbolEntry(name.image,varValue,varDefLine,varSymbolType,varDataType,varLen,varDimension);
+        tmp = new SymbolEntry(name.image,null,varDefLine,varSymbolType,varDataType,varLen,varDimension);
         semanticAnalyzer.checkArrayRedefinition(tmp);
     }else{
         for(String id: names){
-            tmp = new SymbolEntry(id,varValue,varDefLine,varSymbolType,varDataType,varLen,varDimension);
+            tmp = new SymbolEntry(id,null,varDefLine,varSymbolType,varDataType,varLen,varDimension);
             semanticAnalyzer.checkVariableRedefinition(tmp);
         }
     }

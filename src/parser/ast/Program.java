@@ -1,7 +1,9 @@
 package parser.ast;
 
+import parser.IRInstruction;
 import parser.Quadruple;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Program extends AST {
@@ -57,7 +59,12 @@ public class Program extends AST {
 
     @Override
     public ArrayList<Quadruple> generateIntermediateCode() {
-        return null;
+        ArrayList<Quadruple> intermediateCode = new ArrayList<>();
+        intermediateCode.add(new Quadruple(IRInstruction.PGRM,this.identifier));
+        intermediateCode.addAll(constBlock.generateIntermediateCode());
+        intermediateCode.addAll(varBlock.generateIntermediateCode());
+        intermediateCode.addAll(codeBlock.generateIntermediateCode());
+        return intermediateCode;
     }
 
     @Override

@@ -1,14 +1,16 @@
 package parser.ast;
 
+import parser.IRInstruction;
 import parser.Quadruple;
+import parser.TempLblGenerator;
 
 import java.util.ArrayList;
 
 public class ForStatement extends Statement{
     private Variable variable;
-    private Expression expression1;
+    private Expression initialValue;
     private ForMode forMode;
-    private Expression expression2;
+    private Expression goal;
     private Statement statement;
     private CodeBlock codeBlock;
 
@@ -18,19 +20,19 @@ public class ForStatement extends Statement{
 
     public ForStatement() {}
 
-    public ForStatement(Variable variable, Expression expression1, ForMode forMode, Expression expression2, Statement statement){
+    public ForStatement(Variable variable, Expression initialValue, ForMode forMode, Expression goal, Statement statement){
         this.variable = variable;
-        this.expression1 = expression1;
+        this.initialValue = initialValue;
         this.forMode = forMode;
-        this.expression2 = expression2;
+        this.goal = goal;
         this.statement = statement;
     }
 
-    public ForStatement(Variable variable, Expression expression1, ForMode forMode, Expression expression2, CodeBlock codeBlock){
+    public ForStatement(Variable variable, Expression initialValue, ForMode forMode, Expression goal, CodeBlock codeBlock){
         this.variable = variable;
-        this.expression1 = expression1;
+        this.initialValue = initialValue;
         this.forMode = forMode;
-        this.expression2 = expression2;
+        this.goal = goal;
         this.codeBlock = codeBlock;
     }
 
@@ -42,12 +44,12 @@ public class ForStatement extends Statement{
         this.variable = variable;
     }
 
-    public Expression getExpression1() {
-        return expression1;
+    public Expression getInitialValue() {
+        return initialValue;
     }
 
-    public void setExpression1(Expression expression1) {
-        this.expression1 = expression1;
+    public void setInitialValue(Expression initialValue) {
+        this.initialValue = initialValue;
     }
 
     public ForMode getForMode() {
@@ -58,12 +60,12 @@ public class ForStatement extends Statement{
         this.forMode = forMode;
     }
 
-    public Expression getExpression2() {
-        return expression2;
+    public Expression getGoal() {
+        return goal;
     }
 
-    public void setExpression2(Expression expression2) {
-        this.expression2 = expression2;
+    public void setGoal(Expression goal) {
+        this.goal = goal;
     }
 
     public Statement getStatement() {
@@ -89,6 +91,27 @@ public class ForStatement extends Statement{
 
     @Override
     public ArrayList<Quadruple> generateIntermediateCode() {
+        ArrayList<Quadruple> ir = new ArrayList<>();
+        ir.addAll(initialValue.generateIntermediateCode());//Evalua el valor inicial del acumulador y almacena el resultado en una variable temporal
+        String ac = this.variable.getName();
+        ir.addAll(goal.generateIntermediateCode());
+
+        String label = TempLblGenerator.getNewInstance();
+        ir.add(new Quadruple(IRInstruction.IF, ir.getLast().getResult(), label,null));
+
+        ir.add(new Quadruple(IRInstruction.LBL, label));//Inicio de etiqueta
+
+        //Genera codigo que se ejecutara dentro del IF
+        if(statement!=null)ir.addAll(statement.generateIntermediateCode());
+        else ir.addAll(codeBlock.generateIntermediateCode());
+
+        //Genera el codigo para aumentar o decrementar en 1
+        if(this.forMode==ForMode.TO) ir.add(new Quadruple(IRInstruction.ADD, ac, "1",ac));
+        else ir.add(new Quadruple(IRInstruction.SUB, ac,"1",ac));
+
+        ir.addAll(goal.generateIntermediateCode());//Reevalua la condicion
+        ir.add(new Quadruple(IRInstruction.IF, ir.getLast().getResult(),label,null));//Prueba para la siguiente iteracion
+        ir.add(new Quadruple(IRInstruction.ENDL, label));//Fin de etiqueta
         return null;
     }
 

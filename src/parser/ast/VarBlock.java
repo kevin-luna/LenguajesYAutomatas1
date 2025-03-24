@@ -1,5 +1,7 @@
 package parser.ast;
 
+import parser.DataType;
+import parser.IRInstruction;
 import parser.Quadruple;
 
 import java.util.ArrayList;
@@ -18,7 +20,36 @@ public class VarBlock extends Block{
 
     @Override
     public ArrayList<Quadruple> generateIntermediateCode() {
-        return null;
+        ArrayList<Quadruple> ir = new ArrayList<>();
+        for(VariableDeclaration cd : variables){
+            if(cd!=null){
+                IRInstruction ins = null;
+                switch (cd.type){
+                    case DataType.INTEGER -> {
+                        ins = IRInstruction.DI;
+                        break;
+                    }
+                    case DataType.REAL -> {
+                        ins = IRInstruction.DR;
+                        break;
+                    }
+                    case DataType.CHAR -> {
+                        ins = IRInstruction.DC;
+                        break;
+                    }
+                    case DataType.BOOLEAN ->{
+                        ins = IRInstruction.DB;
+                        break;
+                    }
+                    case DataType.STRING -> {
+                        ins = IRInstruction.DS;
+                        break;
+                    }
+                }
+                ir.add(new Quadruple(ins,cd.name));
+            }
+        }
+        return ir;
     }
 
     @Override

@@ -19,7 +19,11 @@ public class CodeBlock extends Block{
     }
 
     public ArrayList<Quadruple> generateIntermediateCode(){
-        return null;
+        ArrayList<Quadruple> ir = new ArrayList<>();
+        for(Statement s : statements){
+            ir.addAll(s.generateIntermediateCode());
+        }
+        return ir;
     }
 
     public void setStatements(ArrayList<Statement> statements) {

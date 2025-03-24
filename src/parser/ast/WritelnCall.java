@@ -1,5 +1,7 @@
 package parser.ast;
 
+import parser.DataType;
+import parser.IRInstruction;
 import parser.Quadruple;
 
 import java.util.ArrayList;
@@ -19,7 +21,9 @@ public class WritelnCall extends WriteCall{
 
     @Override
     public ArrayList<Quadruple> generateIntermediateCode() {
-        return null;
+        ArrayList<Quadruple> ir = super.generateIntermediateCode();
+        ir.add(new Quadruple(IRInstruction.PC,"\n",null,null));
+        return ir;
     }
 
     @Override

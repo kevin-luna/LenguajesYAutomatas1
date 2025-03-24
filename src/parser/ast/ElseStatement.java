@@ -41,7 +41,8 @@ public class ElseStatement extends AST{
 
     @Override
     public ArrayList<Quadruple> generateIntermediateCode() {
-        return null;
+        if(statement!=null) statement.generateIntermediateCode();
+        return codeBlock.generateIntermediateCode();
     }
 
     @Override
