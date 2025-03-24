@@ -178,7 +178,7 @@ ConstBlock ConstBlock() :
     <CONST_KEYWORD> (
       identifier=<IDENTIFIER> <COLON> typeIdentifier=TypeIdentifier() <EQ_OP> constant=Constant() <SEMICOLON>
       {
-            SymbolEntry newConstant = new SymbolEntry(
+            newConstant = new SymbolEntry(
                                                     identifier.image,
                                                     constant.getValue(),
                                                     identifier.beginLine,
