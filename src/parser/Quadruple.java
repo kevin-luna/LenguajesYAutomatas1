@@ -1,24 +1,29 @@
 package parser;
 
 public class Quadruple {
-    private String instruction;
+    private IRInstruction instruction;
     private String op1,op2;
     private String result;
 
     public Quadruple(){}
 
-    public Quadruple(String instruction, String op1, String op2, String result) {
+    public Quadruple(IRInstruction instruction,String result){
+        this.instruction = instruction;
+        this.result = result;
+    }
+
+    public Quadruple(IRInstruction instruction, String op1, String op2, String result) {
         this.instruction = instruction;
         this.op1 = op1;
         this.op2 = op2;
         this.result = result;
     }
 
-    public String getInstruction() {
+    public IRInstruction getInstruction() {
         return instruction;
     }
 
-    public void setInstruction(String instruction) {
+    public void setInstruction(IRInstruction instruction) {
         this.instruction = instruction;
     }
 
