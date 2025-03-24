@@ -1,7 +1,9 @@
 package parser.ast;
 
 import parser.DataType;
+import parser.IRInstruction;
 import parser.Quadruple;
+import parser.TempVarGenerator;
 
 import java.util.ArrayList;
 
@@ -62,7 +64,41 @@ public class Expression extends AST{
 
     @Override
     public ArrayList<Quadruple> generateIntermediateCode() {
-        return null;
+        ArrayList<Quadruple> ir = new ArrayList<>();
+        String leftResult, rightResult;
+        ir.addAll(leftOperand.generateIntermediateCode());
+        leftResult = ir.getLast().getResult();
+        ir.addAll(rightOperand.generateIntermediateCode());
+        rightResult = ir.getLast().getResult();
+        IRInstruction ins = null;
+        switch (operator){
+            case "=" -> {
+                ins = IRInstruction.EQ;
+                break;
+            }
+            case "<>" -> {
+                ins = IRInstruction.NEQ;
+                break;
+            }
+            case ">" -> {
+                ins = IRInstruction.GT;
+                break;
+            }
+            case "<" -> {
+                ins = IRInstruction.LT;
+                break;
+            }
+            case ">=" -> {
+                ins = IRInstruction.GEQ;
+                break;
+            }
+            case "<=" -> {
+                ins = IRInstruction.LEQ;
+                break;
+            }
+        }
+        ir.add(new Quadruple(ins,leftResult,rightResult, TempVarGenerator.getNewInstance()));
+        return ir;
     }
 
     @Override

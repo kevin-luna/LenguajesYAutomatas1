@@ -1,7 +1,9 @@
 package parser.ast;
 
 import parser.DataType;
+import parser.IRInstruction;
 import parser.Quadruple;
+import parser.TempVarGenerator;
 
 import java.util.ArrayList;
 
@@ -103,7 +105,18 @@ public class Factor extends AST{
 
     @Override
     public ArrayList<Quadruple> generateIntermediateCode() {
-        return null;
+        ArrayList<Quadruple> ir = new ArrayList<>();
+        if(variable!=null){
+            ir.add(new Quadruple(IRInstruction.MOV,variable.getName(),null, TempVarGenerator.getNewInstance()));
+        }else if(unsignedConstant!=null){
+            ir.add(new Quadruple(IRInstruction.MOV,unsignedConstant.getValue(),null,TempVarGenerator.getNewInstance()));
+        }else if(expression!=null){
+            ir.addAll(expression.generateIntermediateCode());
+        }else if(factor!=null){
+            ir.addAll(factor.generateIntermediateCode());
+            ir.add(new Quadruple(IRInstruction.NOT, ir.getLast().getResult(),null, TempVarGenerator.getNewInstance()));
+        }
+        return ir;
     }
 
     @Override
