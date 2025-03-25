@@ -22,7 +22,7 @@ public class WritelnCall extends WriteCall{
     @Override
     public ArrayList<Quadruple> generateIntermediateCode() {
         ArrayList<Quadruple> ir = super.generateIntermediateCode();
-        ir.add(new Quadruple(IRInstruction.PC,"\n",null,null));
+        ir.add(new Quadruple(IRInstruction.PC,"\\n",null,null));
         return ir;
     }
 

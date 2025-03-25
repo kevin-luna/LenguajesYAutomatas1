@@ -702,7 +702,6 @@ ForStatement ForStatement():
     && semanticAnalyzer.checkAssignment(variable,expr)
     && expr2.getReturnType()==DataType.INTEGER
     ){
-        System.out.println("Generando for...");
         ForMode forMode=mode.image.toLowerCase()=="to" ? ForMode.TO:ForMode.DOWNTO;
         semanticStack.popBlock();
         if(stmt!=null) return new ForStatement(variable,expr,forMode,expr2,stmt);

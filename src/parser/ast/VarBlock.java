@@ -46,7 +46,7 @@ public class VarBlock extends Block{
                         break;
                     }
                 }
-                if(v.getVariableType()== VariableDeclaration.VariableType.VARIABLE)ir.add(new Quadruple(ins,v.name));
+                if(v.getVariableType()== VariableDeclaration.VariableType.VARIABLE)ir.add(new Quadruple(ins,"1",null,v.name));
                 else ir.add(new Quadruple(ins,Integer.toString(v.getLength()),null,v.name));
             }
         }

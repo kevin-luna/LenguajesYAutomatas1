@@ -47,7 +47,7 @@ public class ReadlnCall extends ReadCall{
             ir.add(new Quadruple(ins,var.getName()));
             ir.add(new Quadruple(IRInstruction.LBL,TempLblGenerator.getNewInstance()));
             ir.add(new Quadruple(IRInstruction.RC,TempVarGenerator.getNewInstance()));
-            ir.add(new Quadruple(IRInstruction.EQ,ir.getLast().getResult(),"\n", TempVarGenerator.getNewInstance()));
+            ir.add(new Quadruple(IRInstruction.EQ,ir.getLast().getResult(),"\\n", TempVarGenerator.getNewInstance()));
             ir.add(new Quadruple(IRInstruction.IF,ir.getLast().getResult(),TempLblGenerator.getLastInstance(), null));
             ir.add(new Quadruple(IRInstruction.ENDL,TempLblGenerator.getLastInstance()));
         }

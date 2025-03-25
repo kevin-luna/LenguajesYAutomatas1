@@ -112,7 +112,7 @@ public class ForStatement extends Statement{
         ir.addAll(goal.generateIntermediateCode());//Reevalua la condicion
         ir.add(new Quadruple(IRInstruction.IF, ir.getLast().getResult(),label,null));//Prueba para la siguiente iteracion
         ir.add(new Quadruple(IRInstruction.ENDL, label));//Fin de etiqueta
-        return null;
+        return ir;
     }
 
     @Override
