@@ -14,4 +14,9 @@ begin
         writeln ('Hello World');
         continue;
     end;
+
+    while flag do
+    begin
+        writeln('si');
+    end;
 end.

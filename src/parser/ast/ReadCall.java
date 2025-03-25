@@ -56,7 +56,7 @@ public class ReadCall extends Statement{
                     break;
                 }
             }
-            ir.add(new Quadruple(ins,var.getName()));
+            ir.add(new Quadruple(IRInstruction.RI,var.getName()));
         }
         return ir;
     }

@@ -92,6 +92,8 @@ public enum IRInstruction {
                 return "PB";
             case PS:
                 return "PS";
+            case RI:
+                return "RI";
             case RR:
                 return "RR";
             case RC:
