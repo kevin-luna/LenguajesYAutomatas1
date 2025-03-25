@@ -21,7 +21,8 @@ public class CodeBlock extends Block{
     public ArrayList<Quadruple> generateIntermediateCode(){
         ArrayList<Quadruple> ir = new ArrayList<>();
         for(Statement s : statements){
-            ir.addAll(s.generateIntermediateCode());
+            ArrayList<Quadruple> tmp = s.generateIntermediateCode();
+            if(tmp!=null)ir.addAll(tmp);
         }
         return ir;
     }

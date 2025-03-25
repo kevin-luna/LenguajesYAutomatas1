@@ -4,6 +4,7 @@ package parser;
 import java.util.ArrayList;
 import parser.ast.*;
 import parser.ast.ForStatement.ForMode;
+import parser.ast.VariableDeclaration.VariableType;
 
 /** Token Manager. */
 @SuppressWarnings ("unused")

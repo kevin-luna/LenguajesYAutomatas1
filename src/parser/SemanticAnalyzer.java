@@ -17,13 +17,12 @@ public class SemanticAnalyzer {
         this.errorLog = errorLog;
     }
 
-    public VariableDeclaration checkVariableRedefinition(SymbolEntry symbol){
-        if(checkSymbolRedefinition(symbol))return null;
-        return new VariableDeclaration(symbol.getDataType(),symbol.getName());
+    public boolean checkVariableRedefinition(SymbolEntry symbol){
+        return checkSymbolRedefinition(symbol);
     }
 
     public boolean checkArrayRedefinition(SymbolEntry symbol){
-        if(symbolTable.getSymbol(symbol.getName()) == null){
+        if(symbolTable.getSymbol(symbol.getName()) != null){
             if(symbolTable.getSymbolType(symbol.getName()) != SymbolType.ARRAY){
                 errorLog.logSemanticError(symbol.getDefLine(),symbol.getName()+" ya existe y no es un arreglo");
                 return true;

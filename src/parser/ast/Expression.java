@@ -68,37 +68,39 @@ public class Expression extends AST{
         String leftResult, rightResult;
         ir.addAll(leftOperand.generateIntermediateCode());
         leftResult = ir.getLast().getResult();
-        ir.addAll(rightOperand.generateIntermediateCode());
-        rightResult = ir.getLast().getResult();
-        IRInstruction ins = null;
+        if(rightOperand != null){
+            ir.addAll(rightOperand.generateIntermediateCode());
+            rightResult = ir.getLast().getResult();
+            ir.add(new Quadruple(decodeInstruction(this.operator),leftResult,rightResult, TempVarGenerator.getNewInstance()));
+        }else ir.add(new Quadruple(IRInstruction.MOV,leftResult,null, TempVarGenerator.getNewInstance()));
+
+        return ir;
+    }
+
+    private IRInstruction decodeInstruction(String operator){
         switch (operator){
             case "=" -> {
-                ins = IRInstruction.EQ;
-                break;
+                return IRInstruction.EQ;
             }
             case "<>" -> {
-                ins = IRInstruction.NEQ;
-                break;
+                return IRInstruction.NEQ;
             }
             case ">" -> {
-                ins = IRInstruction.GT;
-                break;
+                return IRInstruction.GT;
             }
             case "<" -> {
-                ins = IRInstruction.LT;
-                break;
+                return IRInstruction.LT;
             }
             case ">=" -> {
-                ins = IRInstruction.GEQ;
-                break;
+                return IRInstruction.GEQ;
             }
             case "<=" -> {
-                ins = IRInstruction.LEQ;
-                break;
+                return IRInstruction.LEQ;
+            }
+            default -> {
+                return null;
             }
         }
-        ir.add(new Quadruple(ins,leftResult,rightResult, TempVarGenerator.getNewInstance()));
-        return ir;
     }
 
     @Override

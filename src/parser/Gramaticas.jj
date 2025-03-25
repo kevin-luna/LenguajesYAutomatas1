@@ -11,6 +11,7 @@ package parser;
 import java.util.ArrayList;
 import parser.ast.*;
 import parser.ast.ForStatement.ForMode;
+import parser.ast.VariableDeclaration.VariableType;
 public class PascalParser {
     private SymbolTable symbolTable = new SymbolTable();
     private ErrorLog errorLog = new ErrorLog();
@@ -18,8 +19,11 @@ public class PascalParser {
     private SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(symbolTable,semanticStack,errorLog);
 
     public void printErrors(){
-        if(!semanticStack.isEmpty()) errorLog.printLog();
-        else System.out.println("No se encontraron errores");
+        errorLog.printLog();
+    }
+
+    public boolean thereAreErrors(){
+        return !errorLog.isEmpty();
     }
 }
 PARSER_END(PascalParser)
@@ -126,7 +130,7 @@ Program Program() :
 {
   //La gramática comentada acepta la palabra reservada "uses" para importar librerías.
   //<PROGRAM_KEYWORD> <IDENTIFIER> (<LPAREN> <IDENTIFIER> (<COMMA> <IDENTIFIER>)* <RPAREN> )?  <SEMICOLON> (UseStatement())* (Block())+ <PERIOD>
-  <PROGRAM_KEYWORD> identifier=<IDENTIFIER>  <SEMICOLON> (VarBlock() | ConstBlock())+ CodeBlock() <PERIOD>
+  <PROGRAM_KEYWORD> identifier=<IDENTIFIER>  <SEMICOLON> (constBlock=ConstBlock())? varBlock=VarBlock()  codeBlock=CodeBlock() <PERIOD>
 
   {this.semanticStack.popBlock();
     return new Program(identifier.image, varBlock, constBlock, codeBlock);
@@ -154,10 +158,11 @@ Block Block():
 VarBlock VarBlock() :
 {
     this.semanticStack.pushBlock(BlockType.VAR_BLOCK);
-    ArrayList<VariableDeclaration> variables= null;
+    ArrayList<VariableDeclaration> variables= new ArrayList<>();
+    ArrayList<VariableDeclaration> tmp = null;
 }
 {
-    <VAR_KEYWORD> (variables=VariableDeclaration(){variables.addAll(variables);})*
+    <VAR_KEYWORD> (tmp=VariableDeclaration(){variables.addAll(tmp);})*
 
     {
         this.semanticStack.popBlock();
@@ -520,10 +525,12 @@ ArrayList<VariableDeclaration> VariableDeclaration():
     varDefLine = name.beginLine;
     names.add(name.image);
 }
-((<COMMA> name=<IDENTIFIER>
-{
-    names.add(name.image);
-} )* <COLON> | <COLON> arrayKeyword=<ARRAY_KEYWORD> <LBRACKET> arrayLen=<INTEGER_CONSTANT> <RBRACKET> <OF_KEYWORD> )
+( <COLON> arrayKeyword=<ARRAY_KEYWORD> <LBRACKET> arrayLen=<INTEGER_CONSTANT> <RBRACKET> <OF_KEYWORD>
+    | (<COMMA> name=<IDENTIFIER>
+      {
+          names.add(name.image);
+      } )* <COLON>
+)
 
 typeIdentifier=TypeIdentifier() <SEMICOLON>
 {
@@ -532,28 +539,19 @@ typeIdentifier=TypeIdentifier() <SEMICOLON>
         varSymbolType = SymbolType.ARRAY;
         varLen=Integer.parseInt(arrayLen.image);
         tmp = new SymbolEntry(name.image,null,varDefLine,varSymbolType,varDataType,varLen,varDimension);
-        semanticAnalyzer.checkArrayRedefinition(tmp);
+        if(!semanticAnalyzer.checkArrayRedefinition(tmp)){
+            variables.add(new VariableDeclaration(name.image,DataTypes.getDataType(typeIdentifier.image),Integer.parseInt(arrayLen.image)));
+            symbolTable.addSymbol(tmp);
+        }
     }else{
         for(String id: names){
             tmp = new SymbolEntry(id,null,varDefLine,varSymbolType,varDataType,varLen,varDimension);
-            semanticAnalyzer.checkVariableRedefinition(tmp);
+            if(!semanticAnalyzer.checkVariableRedefinition(tmp)){
+                variables.add(new VariableDeclaration(id,DataTypes.getDataType(typeIdentifier.image)));
+                symbolTable.add(tmp);
+            }
         }
     }
-}
-//{
-//    for(String s:ids){
-//        String identifierName = newVariable.image;
-//        if(symbolTable.lookSymbol(identifierName)){
-//            errorLog.logSemanticError(newVariable.beginLine,"Redeclaracion de la variable "+identifierName);
-//        }else{
-//            dimension = arrayKeyword != null ? 1:0;
-//            len = arraySize!=null ? Integer.parseInt(arraySize.image):0;
-//            symbolTable.addSymbol(new SymbolEntry(s,"",typeIdentifier.image, DataTypes.getSize(typeIdentifier.image,len),dimension));
-//        }
-//    }
-//}
-
-{
     this.semanticStack.popBlock();
     return variables;
 }
@@ -702,8 +700,9 @@ ForStatement ForStatement():
     && variable.getDataType()==DataType.INTEGER
     && symbolTable.getSymbolType(variable.getName())!=SymbolType.ARRAY
     && semanticAnalyzer.checkAssignment(variable,expr)
-    && expr2.getReturnType()!=DataType.INTEGER
+    && expr2.getReturnType()==DataType.INTEGER
     ){
+        System.out.println("Generando for...");
         ForMode forMode=mode.image.toLowerCase()=="to" ? ForMode.TO:ForMode.DOWNTO;
         semanticStack.popBlock();
         if(stmt!=null) return new ForStatement(variable,expr,forMode,expr2,stmt);

@@ -1,7 +1,9 @@
 package parser.ast;
 
 import parser.DataType;
+import parser.IRInstruction;
 import parser.Quadruple;
+import parser.TempVarGenerator;
 
 import java.util.ArrayList;
 
@@ -62,7 +64,35 @@ public class SimpleExpression extends AST{
 
     @Override
     public ArrayList<Quadruple> generateIntermediateCode() {
-        return null;
+        ArrayList<Quadruple> ir = firstTerm.generateIntermediateCode();
+        String last = ir.getLast().getResult();
+        for(int i = 1,j=0; i<otherTerms.size(); i++,j++){
+            ir.addAll(otherTerms.get(i).generateIntermediateCode());
+            String current = ir.getLast().getResult();
+            ir.add(new Quadruple(
+                    decodeInstruction(operators.get(j)),
+                    last,
+                    current,
+                    TempVarGenerator.getNewInstance()
+                )
+            );
+            last = ir.getLast().getResult();
+        }
+        return ir;
+    }
+
+    private IRInstruction decodeInstruction(String operator) {
+        switch (operator) {
+            case "+" -> {
+                return IRInstruction.ADD;
+            }
+            case "-" -> {
+                return IRInstruction.SUB;
+            }
+            default -> {
+                return IRInstruction.OR;
+            }
+        }
     }
 
     @Override

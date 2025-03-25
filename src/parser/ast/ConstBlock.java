@@ -33,7 +33,7 @@ public class ConstBlock extends Block{
         for(ConstDeclaration cd : constants){
             if(cd!=null){
                 IRInstruction ins = null;
-                switch (cd.type){
+                switch (cd.getDataType()){
                     case DataType.INTEGER -> {
                         ins = IRInstruction.DI;
                         break;
@@ -55,7 +55,7 @@ public class ConstBlock extends Block{
                         break;
                     }
                 }
-                ir.add(new Quadruple(ins,cd.name));
+                ir.add(new Quadruple(ins,cd.getName()));
             }
         }
         return ir;

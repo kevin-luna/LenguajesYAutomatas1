@@ -50,4 +50,8 @@ public class Quadruple {
     public void setResult(String result) {
         this.result = result;
     }
+
+    public String toString(){
+        return instruction+" "+op1 + " " + op2 + " " + result;
+    }
 }

@@ -21,10 +21,10 @@ public class VarBlock extends Block{
     @Override
     public ArrayList<Quadruple> generateIntermediateCode() {
         ArrayList<Quadruple> ir = new ArrayList<>();
-        for(VariableDeclaration cd : variables){
-            if(cd!=null){
+        for(VariableDeclaration v : variables){
+            if(v!=null){
                 IRInstruction ins = null;
-                switch (cd.type){
+                switch (v.type){
                     case DataType.INTEGER -> {
                         ins = IRInstruction.DI;
                         break;
@@ -46,7 +46,8 @@ public class VarBlock extends Block{
                         break;
                     }
                 }
-                ir.add(new Quadruple(ins,cd.name));
+                if(v.getVariableType()== VariableDeclaration.VariableType.VARIABLE)ir.add(new Quadruple(ins,v.name));
+                else ir.add(new Quadruple(ins,Integer.toString(v.getLength()),null,v.name));
             }
         }
         return ir;

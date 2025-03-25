@@ -1,7 +1,9 @@
 import parser.*;
+import parser.ast.Program;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 
 public class Main {
@@ -15,9 +17,16 @@ public class Main {
         PascalParser parser = null;
         try{
             parser = new PascalParser(new PascalParserTokenManager(new SimpleCharStream(new FileInputStream(ruta))));
-            parser.Program();
-            if(parser!=null){
+            Program program = parser.Program();
+            if(parser.thereAreErrors()){
                 parser.printErrors();
+            }else{
+                System.out.println("No se encontraron errores");
+                System.out.println("Generando el codigo intermedio...");
+                ArrayList<Quadruple> ir = program.generateIntermediateCode();
+                for(Quadruple q: ir){
+                    System.out.println(q);
+                }
             }
         }catch(ParseException e){
             System.out.println("Error: " + e.getMessage());

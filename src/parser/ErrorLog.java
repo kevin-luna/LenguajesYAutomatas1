@@ -22,6 +22,10 @@ public class ErrorLog
         this.errorList.add(new ErrorEntry(ErrorType.SEMANTIC_ERROR,line,description));
     }
 
+    public boolean isEmpty(){
+        return this.errorList.isEmpty();
+    }
+
     public void printLog(){
         for(ErrorEntry entry: this.errorList){
             System.out.println(entry);

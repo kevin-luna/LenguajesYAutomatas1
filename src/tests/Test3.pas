@@ -1,9 +1,9 @@
 program Hello;
 var
-    flag: integer;
+    miArray: array[10] of real;
+    flag: boolean;
     ac: integer;
-const
-
+    quotient: real;
 begin
     for ac:=0 to 10 do
     begin

@@ -37,4 +37,81 @@ public enum IRInstruction {
     ENDL, //Marca el fin de la etiqueta op1
     PGRM, //Indica el inicio del programa res
     MOV; //Asigna op1 a res
+
+    public String toString() {
+        switch (this) {
+            case ADD:
+                return "ADD";
+            case SUB:
+                return "SUB";
+            case MUL:
+                return "MUL";
+            case DIV:
+                return "DIV";
+            case MOD:
+                return "MOD";
+            case AND:
+                return "AND";
+            case OR:
+                return "OR";
+            case XOR:
+                return "XOR";
+            case NOT:
+                return "NOT";
+            case EQ:
+                return "EQ";
+            case NEQ:
+                return "NEQ";
+            case LT:
+                return "LT";
+            case GT:
+                return "GT";
+            case LEQ:
+                return "LEQ";
+            case GEQ:
+                return "GEQ";
+            case IF:
+                return "IF";
+            case DI:
+                return "DI";
+            case DR:
+                return "DR";
+            case DC:
+                return "DC";
+            case DS:
+                return "DS";
+            case DB:
+                return "DB";
+            case PI:
+                return "PI";
+            case PR:
+                return "PR";
+            case PC:
+                return "PC";
+            case PB:
+                return "PB";
+            case PS:
+                return "PS";
+            case RR:
+                return "RR";
+            case RC:
+                return "RC";
+            case RB:
+                return "RB";
+            case RS:
+                return "RS";
+            case LBL:
+                return "LBL";
+            case JMP:
+                return "JMP";
+            case ENDL:
+                return "ENDL";
+            case PGRM:
+                return "PGRM";
+            case MOV:
+                return "MOV";
+            default:
+                return "";
+        }
+    }
 }

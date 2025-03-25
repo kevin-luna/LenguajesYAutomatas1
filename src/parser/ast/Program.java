@@ -61,8 +61,8 @@ public class Program extends AST {
     public ArrayList<Quadruple> generateIntermediateCode() {
         ArrayList<Quadruple> intermediateCode = new ArrayList<>();
         intermediateCode.add(new Quadruple(IRInstruction.PGRM,this.identifier));
-        intermediateCode.addAll(constBlock.generateIntermediateCode());
-        intermediateCode.addAll(varBlock.generateIntermediateCode());
+        if(constBlock!=null)intermediateCode.addAll(constBlock.generateIntermediateCode());
+        if(varBlock!=null)intermediateCode.addAll(varBlock.generateIntermediateCode());
         intermediateCode.addAll(codeBlock.generateIntermediateCode());
         return intermediateCode;
     }

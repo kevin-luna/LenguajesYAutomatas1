@@ -1,7 +1,9 @@
 package parser.ast;
 
 import parser.DataType;
+import parser.IRInstruction;
 import parser.Quadruple;
+import parser.TempVarGenerator;
 
 import java.util.ArrayList;
 
@@ -60,9 +62,38 @@ public class Term extends AST{
 
     }
 
-    @Override
     public ArrayList<Quadruple> generateIntermediateCode() {
-        return null;
+        ArrayList<Quadruple> ir = firstFactor.generateIntermediateCode();
+        String last = ir.getLast().getResult();
+        for(int i = 1,j=0; i<otherFactors.size(); i++, j++){
+            ir.addAll(otherFactors.get(i).generateIntermediateCode());
+            String curr = ir.getLast().getResult();
+            ir.add(new Quadruple(decodeInstruction(operands.get(j)),
+                    last,
+                    curr,
+                    TempVarGenerator.getNewInstance()
+                    )
+            );
+            last = ir.getLast().getResult();
+        }
+        return ir;
+    }
+
+    private IRInstruction decodeInstruction(String operator){
+        switch (operator){
+            case "*" -> {
+                return IRInstruction.MUL;
+            }
+            case "AND" -> {
+                return IRInstruction.AND;
+            }
+            case "MOD" -> {
+                return IRInstruction.MOD;
+            }
+            default -> {
+                return IRInstruction.DIV;
+            }
+        }
     }
 
     @Override

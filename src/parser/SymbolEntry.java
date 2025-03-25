@@ -89,7 +89,4 @@ public class SymbolEntry {
         this.dimension = dimension;
     }
 
-    public VariableDeclaration getVariableDeclaration(){
-        return new VariableDeclaration(dataType,name);
-    }
 }
