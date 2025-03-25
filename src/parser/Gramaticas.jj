@@ -422,12 +422,14 @@ Constant Constant():
     ((sign=<ADD_OP> | sign=<SUB_OP>)? (
 
     identifier=<IDENTIFIER>{
-        DataType dt = symbolTable.getDataType(identifier.image);
-        if(dt!=null && semanticAnalyzer.checkConstant(dt,sign.image,identifier.beginLine)){
-            return new Constant(identifier.image,dt,sign.image);
+        if(identifier!=null){
+            DataType dt = symbolTable.getDataType(identifier.image);
+            if(dt!=null && semanticAnalyzer.checkConstant(dt,sign.image,identifier.beginLine)){
+                return new Constant(identifier.image,dt,sign.image);
+            }
         }
     }
-    | unsignedNumber=UnsignedNumber() { return new Constant(unsignedNumber.getValue(),symbolTable.getDataType(identifier.image),sign.image);})
+    | unsignedNumber=UnsignedNumber() { return new Constant(unsignedNumber.getValue(),unsignedNumber.getType(),sign!=null ? sign.image:null);})
     )
     | charConstant=<CHAR_CONSTANT> {return new Constant(charConstant.image,DataType.CHAR);}
     | stringConstant=<STRING_CONSTANT> {return new Constant(stringConstant.image,DataType.STRING);}
@@ -548,7 +550,7 @@ typeIdentifier=TypeIdentifier() <SEMICOLON>
             tmp = new SymbolEntry(id,null,varDefLine,varSymbolType,varDataType,varLen,varDimension);
             if(!semanticAnalyzer.checkVariableRedefinition(tmp)){
                 variables.add(new VariableDeclaration(id,DataTypes.getDataType(typeIdentifier.image)));
-                symbolTable.add(tmp);
+                symbolTable.addSymbol(tmp);
             }
         }
     }
@@ -596,10 +598,13 @@ AssignmentStatement AssignmentStatement():
         if(!semanticAnalyzer.checkConstReassignment(variable.getName())){
             if(!semanticAnalyzer.checkAssignment(variable,expression)){
                 errorLog.logSemanticError(assignmentOp.beginLine, "No se puede asignar un "+expression.getReturnType()+" a un "+variable.getDataType());
+            }else{
+                return new AssignmentStatement(variable,expression);
             }
-            return new AssignmentStatement();
+        }else{
+            errorLog.logSemanticError(assignmentOp.beginLine, "Rasignacion de constante "+variable.getName());
         }
-        return new AssignmentStatement(variable,expression);
+        return null;
     }
 }
 
@@ -702,7 +707,8 @@ ForStatement ForStatement():
     && semanticAnalyzer.checkAssignment(variable,expr)
     && expr2.getReturnType()==DataType.INTEGER
     ){
-        ForMode forMode=mode.image.toLowerCase()=="to" ? ForMode.TO:ForMode.DOWNTO;
+        System.out.println("generando for");
+        ForMode forMode=mode.image.toLowerCase().toLowerCase().equals("to") ? ForMode.TO:ForMode.DOWNTO;
         semanticStack.popBlock();
         if(stmt!=null) return new ForStatement(variable,expr,forMode,expr2,stmt);
         return new ForStatement(variable,expr,forMode,expr2,codeBlock);

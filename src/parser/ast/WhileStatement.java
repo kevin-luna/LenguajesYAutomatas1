@@ -66,7 +66,7 @@ public class WhileStatement extends Statement{
         ir.addAll(expr.generateIntermediateCode());//Se reevalua la condicion
         ir.add(new Quadruple(IRInstruction.IF, ir.getLast().getResult(),TempLblGenerator.getLastInstance(),null));//Prueba para la siguiente iteracion
         ir.add(new Quadruple(IRInstruction.ENDL, TempLblGenerator.getLastInstance()));//Fin de etiqueta
-        return null;
+        return ir;
     }
 
     @Override

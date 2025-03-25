@@ -1,7 +1,9 @@
 package parser.ast;
 
+import parser.IRInstruction;
 import parser.Quadruple;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class AssignmentStatement extends Statement{
@@ -38,7 +40,9 @@ public class AssignmentStatement extends Statement{
 
     @Override
     public ArrayList<Quadruple> generateIntermediateCode(){
-        return null;
+        ArrayList<Quadruple> ir = expression.generateIntermediateCode();
+        ir.add(new Quadruple(IRInstruction.MOV,ir.getLast().getResult(),null,variable.getName()));
+        return ir;
     }
 
     @Override

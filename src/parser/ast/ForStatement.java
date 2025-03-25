@@ -106,8 +106,14 @@ public class ForStatement extends Statement{
         else ir.addAll(codeBlock.generateIntermediateCode());
 
         //Genera el codigo para aumentar o decrementar en 1
-        if(this.forMode==ForMode.TO) ir.add(new Quadruple(IRInstruction.ADD, ac, "1",ac));
-        else ir.add(new Quadruple(IRInstruction.SUB, ac,"1",ac));
+        if(this.forMode==ForMode.TO) {
+            System.out.println("ola");
+            ir.add(new Quadruple(IRInstruction.ADD, ac, "1", ac));
+        }
+        else if(this.forMode==ForMode.DOWNTO) {
+            System.out.println("mundo");
+            ir.add(new Quadruple(IRInstruction.SUB, ac, "1", ac));
+        }
 
         ir.addAll(goal.generateIntermediateCode());//Reevalua la condicion
         ir.add(new Quadruple(IRInstruction.IF, ir.getLast().getResult(),label,null));//Prueba para la siguiente iteracion

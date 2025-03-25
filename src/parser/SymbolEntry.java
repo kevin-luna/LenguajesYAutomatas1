@@ -89,4 +89,8 @@ public class SymbolEntry {
         this.dimension = dimension;
     }
 
+    @Override
+    public String toString() {
+        return "(" + name + "," + value + "," + defLine + "," + type + "," + dataType + "," + len + "," + size + "," + dimension + ")";
+    }
 }
