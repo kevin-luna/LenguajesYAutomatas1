@@ -50,4 +50,13 @@ public class ConstDeclaration extends AST {
     public void generateCode() {
 
     }
+
+    @Override
+    public void print(int level) {
+        System.out.println("CONST_DECLARATION");
+        Utils.printIntermediateBranch(level+1);
+        System.out.println(dataType);
+        Utils.printLastBranch(level+1);
+        System.out.println(name);
+    }
 }

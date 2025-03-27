@@ -26,4 +26,9 @@ public class UnsignedNumber extends UnsignedConstant{
     public void generateCode() {
 
     }
+
+    @Override
+    public void print(int level) {
+
+    }
 }

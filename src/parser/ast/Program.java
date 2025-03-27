@@ -71,4 +71,14 @@ public class Program extends AST {
     public void generateCode() {
 
     }
+
+    @Override
+    public void print(int level) {
+        System.out.println("PROGRAM");
+        Utils.printBranch(false,level);
+        System.out.println(identifier);
+        if(constBlock!=null)constBlock.print(level+1);
+        if(varBlock!=null) varBlock.print(level+1);;
+        if(codeBlock!=null) codeBlock.print(level+1);
+    }
 }

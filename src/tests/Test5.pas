@@ -1,4 +1,6 @@
 program Hello;
+const
+    PI: real = 3.141592;
 var
     i,j:integer;
     n,p:integer;

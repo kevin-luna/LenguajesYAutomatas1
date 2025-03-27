@@ -107,4 +107,18 @@ public class Expression extends AST{
     public void generateCode() {
 
     }
+
+    @Override
+    public void print(int level) {
+        System.out.println("EXPRESSION");
+        Utils.printLastBranch(level+1);
+        leftOperand.print(level+1);
+
+        if(rightOperand != null){
+            Utils.printLastBranch(level+1);
+            System.out.println(operator);
+            Utils.printLastBranch(level+1);
+            rightOperand.print(level+1);
+        }
+    }
 }

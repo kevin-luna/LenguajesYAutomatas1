@@ -49,4 +49,9 @@ public class ElseStatement extends AST{
     public void generateCode() {
 
     }
+
+    @Override
+    public void print(int level) {
+
+    }
 }

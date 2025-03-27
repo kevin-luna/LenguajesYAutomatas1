@@ -65,4 +65,17 @@ public class ConstBlock extends Block{
     public void generateCode() {
 
     }
+
+    @Override
+    public void print(int level){
+        Utils.printIntermediateBranch(level);
+        System.out.println("CONST");
+        for(int i=0; i<constants.size(); i++){
+            ConstDeclaration cd = constants.get(i);
+            if(cd!=null){
+                Utils.printBranch(i==constants.size()-1,level+1);
+                cd.print(level+1);
+            }
+        }
+    }
 }

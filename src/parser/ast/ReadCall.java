@@ -4,6 +4,7 @@ import parser.DataType;
 import parser.IRInstruction;
 import parser.Quadruple;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 
 public class ReadCall extends Statement{
@@ -64,5 +65,15 @@ public class ReadCall extends Statement{
     @Override
     public void generateCode() {
 
+    }
+
+    @Override
+    public void print(int level) {
+        System.out.println("READ_CALL");
+
+        for(int i=0; i<variables.size(); i++){
+            Utils.printBranch(i==variables.size()-1,level+1);
+            variables.get(i).print(level+1);
+        }
     }
 }

@@ -49,4 +49,13 @@ public class AssignmentStatement extends Statement{
     public void generateCode() {
 
     }
+
+    @Override
+    public void print(int level) {
+        System.out.println("ASSIGNMENT_STATEMENT");
+        Utils.printIntermediateBranch(level+1);
+        variable.print(level+1);
+        Utils.printLastBranch(level+1);
+        expression.print(level+1);
+    }
 }

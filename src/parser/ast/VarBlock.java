@@ -55,4 +55,17 @@ public class VarBlock extends Block{
 
     @Override
     public void generateCode() {}
+
+    @Override
+    public void print(int level) {
+        Utils.printIntermediateBranch(level);
+        System.out.println("VARBLOCK");
+        for (int i=0;i<variables.size();i++){
+            VariableDeclaration v = variables.get(i);
+            if(v!=null){
+                Utils.printBranch(i==variables.size()-1,level+1);
+                v.print(level+1);
+            }
+        }
+    }
 }

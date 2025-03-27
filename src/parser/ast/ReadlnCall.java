@@ -59,4 +59,9 @@ public class ReadlnCall extends ReadCall{
     public void generateCode() {
 
     }
+
+    @Override
+    public void print(int level) {
+
+    }
 }

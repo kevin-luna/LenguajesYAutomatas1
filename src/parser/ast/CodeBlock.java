@@ -30,4 +30,14 @@ public class CodeBlock extends Block{
     public void setStatements(ArrayList<Statement> statements) {
         this.statements = statements;
     }
+
+    @Override
+    public void print(int level) {
+        Utils.printLastBranch(level);
+        System.out.println("CODE_BLOCK");
+        for(int i=0; i<statements.size(); i++){
+            Utils.printBranch(i==statements.size()-1,level+1);
+            statements.get(i).print(level+1);
+        }
+    }
 }

@@ -3,6 +3,7 @@ package parser.ast;
 import parser.DataType;
 import parser.Quadruple;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 
 public class UnsignedConstant extends AST{
@@ -45,5 +46,12 @@ public class UnsignedConstant extends AST{
     @Override
     public void generateCode() {
 
+    }
+
+    @Override
+    public void print(int level) {
+        System.out.println("UNSIGNED_CONSTANT");
+        Utils.printLastBranch(level+1);
+        System.out.println(value);
     }
 }

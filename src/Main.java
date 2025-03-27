@@ -22,6 +22,8 @@ public class Main {
                 parser.printErrors();
             }else{
                 System.out.println("No se encontraron errores");
+                System.out.println("Imprimiendo el AST");
+                program.print(0);
                 System.out.println("Generando el codigo intermedio...");
                 ArrayList<Quadruple> ir = program.generateIntermediateCode();
                 for(Quadruple q: ir){

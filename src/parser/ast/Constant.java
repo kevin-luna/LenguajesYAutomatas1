@@ -34,4 +34,9 @@ public class Constant extends UnsignedConstant{
     public void generateCode() {
 
     }
+
+    @Override
+    public void print(int level) {
+
+    }
 }

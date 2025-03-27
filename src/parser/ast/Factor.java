@@ -123,4 +123,23 @@ public class Factor extends AST{
     public void generateCode() {
 
     }
+
+    @Override
+    public void print(int level) {
+        System.out.println("FACTOR");
+        Utils.printLastBranch(level+1);
+        if(variable!=null){
+            if(negated!=null){
+                System.out.println("NOT");
+                Utils.printIntermediateBranch(level+1);
+            }
+            variable.print(level+1);
+        }else if(unsignedConstant!=null){
+            unsignedConstant.print(level+1);
+        }else if(expression!=null){
+            expression.print(level+1);
+        }else if(factor!=null){
+            factor.print(level+1);
+        }
+    }
 }

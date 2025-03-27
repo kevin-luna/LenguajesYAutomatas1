@@ -99,4 +99,20 @@ public class SimpleExpression extends AST{
     public void generateCode() {
 
     }
+
+    @Override
+    public void print(int level) {
+        System.out.println("SIMPLE_EXPRESSION");
+        Utils.printIntermediateBranch(level+1);
+        firstTerm.print(level+1);
+        if(otherTerms.size()>0){
+            for(int i = 1,j=0; i<otherTerms.size(); i++,j++){
+                Utils.printIntermediateBranch(level+1);
+                System.out.println(this.operators.get(j));
+                Utils.printBranch(i==otherTerms.size()-1,level+1);
+                otherTerms.get(i).print(level+1);
+            }
+        }
+
+    }
 }

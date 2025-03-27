@@ -356,7 +356,7 @@ Term Term():
 {
     Factor firstFactor = null,curr=null,prev=null;
     ArrayList<Factor> otherFactors = new ArrayList<>();
-    ArrayList<String> operators = new ArrayList();
+    ArrayList<String> operators = new ArrayList<>();
     Token op=null;
     boolean termIsValid=true;
 }
@@ -364,7 +364,7 @@ Term Term():
     firstFactor=Factor() {prev=firstFactor;}
     ((op=<MUL_OP> | op=<DIV_OP> | op=<DIV_KEYWORD> |op=<MOD_KEYWORD> | op=<AND_KEYWORD>)
     curr=Factor() {
-        if(op.image.toLowerCase() == "and"){
+        if(op.image.equalsIgnoreCase("and")){
             if(!semanticAnalyzer.factorIsBoolean(prev) || !semanticAnalyzer.factorIsBoolean(curr)){
                 errorLog.logSemanticError(op.beginLine,"No se puede aplicar la operacion AND a tipos no booleanos");
                 termIsValid=false;
@@ -382,7 +382,9 @@ Term Term():
     )*
 
     {
-        if(termIsValid) return new Term(firstFactor,operators,otherFactors);
+        if(termIsValid){
+             return new Term(firstFactor,operators,otherFactors);
+        }
         return new Term();
     }
 }

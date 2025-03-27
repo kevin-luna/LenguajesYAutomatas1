@@ -80,4 +80,14 @@ public class VariableDeclaration extends AST{
     public void generateCode() {
 
     }
+
+    @Override
+    public void print(int level) {
+
+        System.out.println("VARIABLE_DECLARATION");
+        Utils.printBranch(false,level+1);
+        System.out.println(type.toString());
+        Utils.printBranch(true, level+1);
+        System.out.println(name);
+    }
 }

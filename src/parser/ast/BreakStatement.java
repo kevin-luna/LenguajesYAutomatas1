@@ -11,4 +11,9 @@ public class BreakStatement extends Statement {
     public ArrayList<Quadruple> generateIntermediateCode(){
         return null;
     }
+
+    @Override
+    public void print(int level) {
+
+    }
 }

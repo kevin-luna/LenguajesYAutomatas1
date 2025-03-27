@@ -8,4 +8,5 @@ public abstract class AST {
     public abstract void traverse();
     public abstract ArrayList<Quadruple> generateIntermediateCode();
     public abstract void generateCode();
+    public abstract void print(int level);
 }

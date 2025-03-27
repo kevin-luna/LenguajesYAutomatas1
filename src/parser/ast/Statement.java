@@ -38,4 +38,9 @@ public abstract class Statement extends AST{
     public void generateCode() {
 
     }
+
+    @Override
+    public void print(int level) {
+
+    }
 }

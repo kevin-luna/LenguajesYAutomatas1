@@ -73,4 +73,9 @@ public class WhileStatement extends Statement{
     public void generateCode() {
 
     }
+
+    @Override
+    public void print(int level) {
+        System.out.println("WHILE_STATEMENT");
+    }
 }

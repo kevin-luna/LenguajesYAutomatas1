@@ -19,4 +19,9 @@ public class TypeIdentifier extends AST {
     public void generateCode() {
 
     }
+
+    @Override
+    public void print(int level) {
+
+    }
 }

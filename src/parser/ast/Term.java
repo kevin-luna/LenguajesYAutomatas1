@@ -9,18 +9,18 @@ import java.util.ArrayList;
 
 public class Term extends AST{
     private Factor firstFactor;
-    private ArrayList<String> operands;
+    private ArrayList<String> operators;
     private ArrayList<Factor> otherFactors;
     private DataType returnType;
 
     public Term(){
-        this.operands = new ArrayList<>();
+        this.operators = new ArrayList<>();
         this.otherFactors = new ArrayList<>();
     }
 
-    public Term(Factor firstFactor, ArrayList<String> operands, ArrayList<Factor> otherFactors) {
+    public Term(Factor firstFactor, ArrayList<String> operators, ArrayList<Factor> otherFactors) {
         this.firstFactor = firstFactor;
-        this.operands = operands;
+        this.operators = operators;
         this.otherFactors = otherFactors;
         this.returnType = firstFactor.getReturnType();
     }
@@ -33,12 +33,12 @@ public class Term extends AST{
         this.firstFactor = firstFactor;
     }
 
-    public ArrayList<String> getOperands() {
-        return operands;
+    public ArrayList<String> getOperators() {
+        return operators;
     }
 
-    public void setOperands(ArrayList<String> operands) {
-        this.operands = operands;
+    public void setOperators(ArrayList<String> operators) {
+        this.operators = operators;
     }
 
     public ArrayList<Factor> getOtherFactors() {
@@ -65,10 +65,10 @@ public class Term extends AST{
     public ArrayList<Quadruple> generateIntermediateCode() {
         ArrayList<Quadruple> ir = firstFactor.generateIntermediateCode();
         String last = ir.getLast().getResult();
-        for(int i = 1,j=0; i<otherFactors.size(); i++, j++){
+        for(int i = 0,j=0; i<otherFactors.size(); i++, j++){
             ir.addAll(otherFactors.get(i).generateIntermediateCode());
             String curr = ir.getLast().getResult();
-            ir.add(new Quadruple(decodeInstruction(operands.get(j)),
+            ir.add(new Quadruple(decodeInstruction(operators.get(j)),
                     last,
                     curr,
                     TempVarGenerator.getNewInstance()
@@ -99,5 +99,20 @@ public class Term extends AST{
     @Override
     public void generateCode() {
 
+    }
+
+    @Override
+    public void print(int level) {
+        System.out.println("TERM");
+        Utils.printIntermediateBranch(level+1);
+        firstFactor.print(level+1);
+        if(otherFactors.size()>0){
+            for(int i = 0,j=0; i<otherFactors.size(); i++,j++){
+                Utils.printIntermediateBranch(level+1);
+                System.out.println(this.operators.get(j));
+                Utils.printBranch(i==otherFactors.size()-1,level+1);
+                otherFactors.get(i).print(level+1);
+            }
+        }
     }
 }

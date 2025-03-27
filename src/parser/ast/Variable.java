@@ -13,6 +13,17 @@ public class Variable extends AST{
 
     public enum VariableType{
         VARIABLE,ARRAY;
+
+        public String toString(){
+            switch(this){
+                case VARIABLE:
+                    return "VARIABLE";
+                case ARRAY:
+                    return "ARRAY";
+                default:
+                    return "UNKNOWN";
+            }
+        }
     }
 
     public Variable(){}
@@ -51,6 +62,20 @@ public class Variable extends AST{
     @Override
     public void generateCode() {
 
+    }
+
+    @Override
+    public void print(int level) {
+        System.out.println("VARIABLE");
+        Utils.printIntermediateBranch(level+1);
+        System.out.println(variableType);
+        Utils.printIntermediateBranch(level+1);
+        System.out.println(dataType);
+        Utils.printIntermediateBranch(level+1);
+        System.out.println(name);
+        if(index!=null){
+            index.print(level+1);
+        }
     }
 
     public String getName() {

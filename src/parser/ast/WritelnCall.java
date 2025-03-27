@@ -30,4 +30,13 @@ public class WritelnCall extends WriteCall{
     public void generateCode() {
 
     }
+
+    @Override
+    public void print(int level){
+        System.out.println("WRITELN_STATEMENT");
+        for(int i = 1,j=0; i<expressions.size(); i++,j++){
+            Utils.printBranch(i==expressions.size()-1,level+1);
+            expressions.get(i).print(level+1);
+        }
+    }
 }

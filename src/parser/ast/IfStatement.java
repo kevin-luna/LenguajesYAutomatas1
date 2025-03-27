@@ -90,4 +90,9 @@ public class IfStatement extends Statement{
     public void generateCode() {
 
     }
+
+    @Override
+    public void print(int level) {
+
+    }
 }
