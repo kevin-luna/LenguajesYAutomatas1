@@ -12,6 +12,8 @@ public class Program extends AST {
     private ConstBlock constBlock;
     private CodeBlock codeBlock;
 
+    public Program() {}
+
     public Program(String identifier, VarBlock varBlock, ConstBlock constBlock, CodeBlock codeBlock) {
         this.identifier = identifier;
         this.varBlock = varBlock;

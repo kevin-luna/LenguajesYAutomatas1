@@ -14,6 +14,10 @@ public class ErrorLog
         this.errorList.add(new ErrorEntry(ErrorType.LEXICAL_ERROR,line,description));
     }
 
+    public void logSyntaxError(ParseException pex){
+        this.errorList.add(new ErrorEntry(ErrorType.SYNTAX_ERROR,pex.currentToken.next.beginLine,pex.getMessage()));
+    }
+
     public void logSyntaxError(int line, String description){
         this.errorList.add(new ErrorEntry(ErrorType.SYNTAX_ERROR,line,description));
     }

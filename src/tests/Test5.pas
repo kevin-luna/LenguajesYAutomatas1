@@ -13,7 +13,7 @@ begin
     while i<=n do
     begin
         j:=1;
-        while j<=p do
+        wHile j<=p do
         begin
             read(calif);
             sum2 := sum2 + calif;

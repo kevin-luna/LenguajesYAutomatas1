@@ -130,11 +130,16 @@ Program Program() :
 {
   //La gramática comentada acepta la palabra reservada "uses" para importar librerías.
   //<PROGRAM_KEYWORD> <IDENTIFIER> (<LPAREN> <IDENTIFIER> (<COMMA> <IDENTIFIER>)* <RPAREN> )?  <SEMICOLON> (UseStatement())* (Block())+ <PERIOD>
+  try{
   <PROGRAM_KEYWORD> identifier=<IDENTIFIER>  <SEMICOLON> (constBlock=ConstBlock())? varBlock=VarBlock()  codeBlock=CodeBlock() <PERIOD>
+  }catch(ParseException pex){
+    errorLog.logSyntaxError(pex);
+    return new Program();
+  }
 
   {this.semanticStack.popBlock();
     return new Program(identifier.image, varBlock, constBlock, codeBlock);
-}
+  }
 }
 
 //void UseStatement():
@@ -151,7 +156,12 @@ Block Block():
 {
     //La gramatica comentada soporta la creacion de procedimientos y funciones
     //CodeBlock() | ConstBlock()  | VarBlock() | Procedure() | Function()
+    try{
     block=CodeBlock() | block=ConstBlock()  | block=VarBlock()
+    }catch(ParseException pex){
+        errorLog.logSyntaxError(pex);
+        return new Block();
+    }
     {return block;}
 }
 
@@ -162,8 +172,12 @@ VarBlock VarBlock() :
     ArrayList<VariableDeclaration> tmp = null;
 }
 {
+    try{
     <VAR_KEYWORD> (tmp=VariableDeclaration(){variables.addAll(tmp);})*
-
+    }catch(ParseException pex){
+        errorLog.logSyntaxError(pex);
+        return new VarBlock();
+    }
     {
         this.semanticStack.popBlock();
         return new VarBlock(variables);
@@ -180,6 +194,7 @@ ConstBlock ConstBlock() :
      ArrayList<ConstDeclaration> constants = new ArrayList();
 }
 {
+    try{
     <CONST_KEYWORD> (
       identifier=<IDENTIFIER> <COLON> typeIdentifier=TypeIdentifier() <EQ_OP> constant=Constant() <SEMICOLON>
       {
@@ -199,6 +214,10 @@ ConstBlock ConstBlock() :
 
           }
     )*
+    }catch(ParseException pex){
+        errorLog.logSyntaxError(pex);
+        return new ConstBlock();
+    }
 
     {
     semanticStack.popBlock();
@@ -212,9 +231,14 @@ CodeBlock CodeBlock() :
     Statement tmp=null;
 }
 {
+   try{
   <BEGIN_KEYWORD>
   (tmp=Statement() {statements.add(tmp);})*
   <END_KEYWORD>
+  }catch(ParseException pex){
+    errorLog.logSyntaxError(pex);
+    return new CodeBlock();
+  }
   {return new CodeBlock(statements);}
 }
 
@@ -224,7 +248,12 @@ Statement Statement() :
 {
     //La gramática comentada acepta la llamada a procedimientos y funciones
     //AssignmentStatement() | ProcedureCall() <SEMICOLON> | FunctionCall() <SEMICOLON> | IfStatement() | CaseStatement() | RepeatStatement() | WhileStatement() | ForStatement()
+    try{
     ( stmt=BreakStatement() | stmt=ContinueStatement() | stmt=AssignmentStatement() | stmt=ForStatement() | stmt=IfStatement() | stmt=ReadCall() | stmt=ReadlnCall() | stmt=WhileStatement() | stmt=WriteCall() | stmt=WritelnCall())
+    }catch(ParseException pex){
+        errorLog.logSyntaxError(pex);
+        return new BreakStatement();
+    }
     {
         return stmt;
     }
@@ -239,8 +268,12 @@ Token TypeIdentifier():
 {
     //La gramatica comentada soporta el uso de tipos definidos por el usuario
     //(<INT_KEYWORD> | <REAL_KEYWORD> | <CHAR_KEYWORD> | <BOOLEAN_KEYWORD> | <IDENTIFIER>) (<LBRACKET> UnsignedNumber() (<COMMA> UnsignedNumber())* <RBRACKET>)?
+    try{
     (type=<INT_KEYWORD> | type=<REAL_KEYWORD> | type=<CHAR_KEYWORD> | type=<BOOLEAN_KEYWORD> | type=<STRING_KEYWORD>)
-
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new Token();
+    }
 
     {return type;}
 }
@@ -291,6 +324,7 @@ Expression Expression():
 {
     //La gramatica comentada soporta el uso de la palabra reservada IN para trabajar con conjuntos.
     //SimpleExpression() ((<EQ_OP> | <LT_OP> | <GT_OP> | <NEQ_OP> | <LE_OP> | <GE_OP> | <IN_KEYWORD>) SimpleExpression() )?
+    try{
     left=SimpleExpression() ((operator=<EQ_OP> |operator=<LT_OP> | operator=<GT_OP> | operator=<NEQ_OP> | operator=<LE_OP> | operator=<GE_OP>) right=SimpleExpression()
     {
         returnType=left.getReturnType();
@@ -300,6 +334,10 @@ Expression Expression():
         }
     }
     )?
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new Expression();
+    }
 
     {
     return new Expression(left.getReturnType(),left);
@@ -318,6 +356,7 @@ SimpleExpression SimpleExpression():
     //Solo se incluye "or", "+" y "-" a este nivel
     // por la precedencia de los operadores
     // para el orden de evaluación
+    try{
     (sign=<ADD_OP> | sign=<SUB_OP>)?
     firstTerm=Term()
     {
@@ -345,6 +384,10 @@ SimpleExpression SimpleExpression():
             prev=curr;
         }
      )*
+     }catch(ParseException pex){
+          errorLog.logSyntaxError(pex);
+          return new SimpleExpression();
+     }
     {
         if(simpleExpressionIsValid) return new SimpleExpression(firstTerm,otherTerms,operators);
         return new SimpleExpression();
@@ -361,6 +404,8 @@ Term Term():
     boolean termIsValid=true;
 }
 {
+    try{
+
     firstFactor=Factor() {prev=firstFactor;}
     ((op=<MUL_OP> | op=<DIV_OP> | op=<DIV_KEYWORD> |op=<MOD_KEYWORD> | op=<AND_KEYWORD>)
     curr=Factor() {
@@ -380,6 +425,10 @@ Term Term():
         prev=curr;
     }
     )*
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new Term();
+     }
 
     {
         if(termIsValid){
@@ -400,6 +449,8 @@ Factor Factor():
 {
     //La gramatica comentada acepta las llamadas a funciones como un factor para una expresion
     //FunctionCall() | <IDENTIFIER>  | Constant() | Variable() | UnsignedConstant() | <LPAREN> Expression() <RPAREN> | <NOT_KEYWORD> Factor() | <LBRACKET> Expression() (<RANGE_OP> Expression())? (<COMMA> Expression() (<RANGE_OP> Expression())?)* <RBRACKET>
+    try{
+
      (variable=Variable() {return new Factor(variable);}
     | unsignedConstant=UnsignedConstant() {return new Factor(unsignedConstant);}
     | <LPAREN> expr=Expression() <RPAREN> { return new Factor(expr,(lparen!=null && rparen!=null) ? true:false);}
@@ -410,6 +461,10 @@ Factor Factor():
     }
     return new Factor(factor,notKeyword!=null ? true:false);
 })
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new Factor();
+    }
 
     {return new Factor();}
 }
@@ -420,6 +475,8 @@ Constant Constant():
     UnsignedNumber unsignedNumber=null;
  }
 {
+    try{
+
     (
     ((sign=<ADD_OP> | sign=<SUB_OP>)? (
 
@@ -436,6 +493,10 @@ Constant Constant():
     | charConstant=<CHAR_CONSTANT> {return new Constant(charConstant.image,DataType.CHAR);}
     | stringConstant=<STRING_CONSTANT> {return new Constant(stringConstant.image,DataType.STRING);}
     )
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new Constant();
+     }
 
     {return new Constant();}
 }
@@ -448,6 +509,8 @@ UnsignedConstant UnsignedConstant():
     String val;DataType type;
 }
 {
+    try{
+
     (identifier=<IDENTIFIER> {
         if(semanticAnalyzer.checkSymbolExists(identifier.image, identifier.beginLine)){
             return new UnsignedConstant(
@@ -460,18 +523,28 @@ UnsignedConstant UnsignedConstant():
     | charLiteral=<CHAR_CONSTANT> {return new UnsignedConstant(charLiteral.image, DataType.CHAR);}
     | stringLiteral=<STRING_CONSTANT> {return new UnsignedConstant(stringLiteral.image,DataType.STRING);})
     | (booleanLiteral=<TRUE_KEYWORD> | booleanLiteral=<FALSE_KEYWORD> ) {return new UnsignedConstant(booleanLiteral.image,DataType.BOOLEAN);}
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new UnsignedConstant();
+     }
 
     {return new UnsignedConstant();}
 }
 
 UnsignedNumber UnsignedNumber():
 {
-    Token numericLiteral;
-    DataType dataType;
+    Token numericLiteral=null;
+    DataType dataType=null;
 }
 {
+    try{
+
     (numericLiteral=<INTEGER_CONSTANT> {dataType = DataType.INTEGER;}
     | numericLiteral=<REAL_CONSTANT> {dataType = DataType.REAL;})
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new UnsignedNumber();
+     }
 
     {return new UnsignedNumber(numericLiteral.image, dataType);}
 }
@@ -489,12 +562,18 @@ Variable Variable():
     Expression expr=null;
 }
 {
+    try{
+
     identifier=<IDENTIFIER>
     (<LBRACKET> expr=Expression() <RBRACKET>
     {
         if(semanticAnalyzer.checkArray(identifier.image,expr,identifier.beginLine)) return new Variable(identifier.image,expr,symbolTable.getDataType(identifier.image));
     }
     )?
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new Variable();
+     }
 
     {
         if(semanticAnalyzer.checkSymbolExists(identifier.image,identifier.beginLine)){
@@ -524,6 +603,9 @@ ArrayList<VariableDeclaration> VariableDeclaration():
      ArrayList<VariableDeclaration> variables = new ArrayList<>();
  }
 {
+    try{
+
+
     name=<IDENTIFIER>
 {
     varDefLine = name.beginLine;
@@ -559,6 +641,10 @@ typeIdentifier=TypeIdentifier() <SEMICOLON>
     this.semanticStack.popBlock();
     return variables;
 }
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new ArrayList<VariableDeclaration>();
+     }
 }
 
 //void ParamDefinition():
@@ -595,6 +681,8 @@ AssignmentStatement AssignmentStatement():
     Token assignmentOp=null;
 }
 {
+    try{
+
     variable=Variable() assignmentOp=<ASSIGN_OP> expression=Expression() <SEMICOLON>
     {
         if(!semanticAnalyzer.checkConstReassignment(variable.getName())){
@@ -608,6 +696,10 @@ AssignmentStatement AssignmentStatement():
         }
         return null;
     }
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new AssignmentStatement();
+     }
 }
 
 IfStatement IfStatement():
@@ -620,6 +712,8 @@ IfStatement IfStatement():
         ElseStatement elseStmt=null;
 }
 {
+    try{
+
     ifKeyword=<IF_KEYWORD> expr=Expression()
     {
         if(expr.getReturnType()!=DataType.BOOLEAN){
@@ -638,6 +732,10 @@ IfStatement IfStatement():
         if(stmt!=null) return new IfStatement(expr,stmt,elseStmt);
         return new IfStatement(expr,codeBlock,elseStmt);
     }
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new IfStatement();
+     }
 }
 
 ElseStatement ElseStatement():
@@ -646,12 +744,18 @@ ElseStatement ElseStatement():
         Statement statement=null;CodeBlock codeBlock=null;
 }
 {
+    try{
+
     <ELSE_KEYWORD> (statement=Statement() | codeBlock=CodeBlock() <SEMICOLON> )
     {
         if(statement!=null)return new ElseStatement(statement);
         semanticStack.popBlock();
         return new ElseStatement(codeBlock);
     }
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new ElseStatement();
+     }
 }
 
 //void CaseStatement():
@@ -669,6 +773,8 @@ WhileStatement WhileStatement():
     CodeBlock codeBlock=null;
 }
 {
+    try{
+
     whileKeyword=<WHILE_KEYWORD> expr=Expression()
     {
         if(expr.getReturnType()!=DataType.BOOLEAN){
@@ -682,6 +788,10 @@ WhileStatement WhileStatement():
         if(stmt!=null)return new WhileStatement(expr,stmt);
         return new WhileStatement(expr,codeBlock);
     }
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new WhileStatement();
+     }
 }
 
 //void RepeatStatement():
@@ -701,6 +811,8 @@ ForStatement ForStatement():
         CodeBlock codeBlock=null;
 }
 {
+    try{
+
     forKeyword=<FOR_KEYWORD> variable=Variable() <ASSIGN_OP> expr=Expression() (mode=<DOWNTO_KEYWORD> | mode=<TO_KEYWORD> ) expr2=Expression() <DO_KEYWORD> (stmt=Statement() | codeBlock=CodeBlock() <SEMICOLON> )
     {
     if(!semanticAnalyzer.checkConstReassignment(variable.getName())
@@ -717,11 +829,17 @@ ForStatement ForStatement():
     semanticStack.popBlock();
     return new ForStatement();
 }
+    }catch(ParseException pex){
+             errorLog.logSyntaxError(pex);
+             return new ForStatement();
+     }
 }
 
 BreakStatement BreakStatement():
 {Token keyword=null;}
 {
+    try{
+
     keyword=<BREAK_KEYWORD> <SEMICOLON>
 
     {
@@ -731,11 +849,17 @@ BreakStatement BreakStatement():
         }
         return new BreakStatement();
     }
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new BreakStatement();
+     }
 }
 
 ContinueStatement ContinueStatement():
 {Token keyword=null;}
 {
+    try{
+
     keyword=<CONTINUE_KEYWORD> <SEMICOLON>
 
     {
@@ -745,6 +869,10 @@ ContinueStatement ContinueStatement():
         }
         return new ContinueStatement();
     }
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new ContinueStatement();
+     }
 }
 
 ReadlnCall ReadlnCall():
@@ -753,8 +881,14 @@ ReadlnCall ReadlnCall():
  Variable tmp = null;
  }
 {
+    try{
+
     <READLN_KEYWORD> (<LPAREN> (tmp=Variable() {variables.add(tmp);}(<COMMA> tmp=Variable() {variables.add(tmp);} )* )? <RPAREN>)? <SEMICOLON>
     {return new ReadlnCall(variables);}
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new ReadlnCall();
+     }
 }
 
 ReadCall ReadCall():
@@ -763,8 +897,14 @@ ReadCall ReadCall():
     Variable tmp=null;
  }
 {
+    try{
+
     <READ_KEYWORD> (<LPAREN> (tmp=Variable() {variables.add(tmp);} (<COMMA> tmp=Variable() {variables.add(tmp);} )* )? <RPAREN>)? <SEMICOLON>
     {return new ReadCall(variables);}
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new ReadCall();
+     }
 }
 
 WritelnCall WritelnCall():
@@ -777,18 +917,10 @@ WritelnCall WritelnCall():
         <WRITELN_KEYWORD>
         try{
             (lparen=<LPAREN> (tmp=Expression() {expressions.add(tmp);} (<COMMA> tmp=Expression() {expressions.add(tmp);} )* )? rparen=<RPAREN>)? semicolon=<SEMICOLON>
-        }catch(ParseException paex){
-            if(lparen==null){
-                errorLog.logSyntaxError(paex.currentToken.endLine,"Se esperaba un \"(\" despues de writeln");
-            }
-            if(lparen==null){
-                errorLog.logSyntaxError(paex.currentToken.endLine,"Se esperaba un \")\" despues de writeln(");
-            }
-            if(semicolon==null){
-                errorLog.logSyntaxError(paex.currentToken.endLine,"Se esperaba un \";\" al final de writeln(...)");
-            }
-            throw paex;
-        }
+        }catch(ParseException pex){
+             errorLog.logSyntaxError(pex);
+             return new WritelnCall();
+         }
     {return new WritelnCall(expressions);}
 }
 
@@ -799,16 +931,13 @@ WriteCall WriteCall():
     Expression tmp = null;
 }
 {
-    <WRITE_KEYWORD> (<LPAREN> (tmp=Expression() {expressions.add(tmp);} (<COMMA> tmp=Expression() {expressions.add(tmp);} )* )? <RPAREN>)?
     try
     {
-        t=<SEMICOLON>
+    <WRITE_KEYWORD> (<LPAREN> (tmp=Expression() {expressions.add(tmp);} (<COMMA> tmp=Expression() {expressions.add(tmp);} )* )? <RPAREN>)? t=<SEMICOLON>
 
-    }catch(ParseException paex){
-        if(t==null){
-                errorLog.logSyntaxError(paex.currentToken.endLine,"Se esperaba un \";\" al final de write(...)");
-        }
-        throw paex;
-    }
+    }catch(ParseException pex){
+         errorLog.logSyntaxError(pex);
+         return new WriteCall();
+     }
     {return new WriteCall(expressions);}
 }

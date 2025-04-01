@@ -122,9 +122,10 @@ public class ParseException extends Exception {
       retval += " \"";
       tok = tok.next;
     }
+    /*
     if (currentToken.next != null) {
       retval += "\" en la linea " + currentToken.next.beginLine + ", columna " + currentToken.next.beginColumn;
-    }
+    }*/
     retval += "." + EOL;
     
     
