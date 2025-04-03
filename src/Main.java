@@ -31,8 +31,9 @@ public class Main {
                 }
             }
         }catch(ParseException e){
-            System.out.println("Error: " + e.getMessage());
-            e.printStackTrace();
+            //System.out.println("Error: " + e.getMessage());
+            System.out.println("Hubo errores Sintacticos");
+        //    e.printStackTrace();
         }catch(FileNotFoundException e){
             System.out.println("No se encontró el archivo: " + e.getMessage());
         }catch (TokenMgrError e){

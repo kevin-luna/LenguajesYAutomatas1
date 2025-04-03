@@ -172,12 +172,13 @@ VarBlock VarBlock() :
     ArrayList<VariableDeclaration> tmp = null;
 }
 {
-    try{
-    <VAR_KEYWORD> (tmp=VariableDeclaration(){variables.addAll(tmp);})*
-    }catch(ParseException pex){
-        errorLog.logSyntaxError(pex);
-        return new VarBlock();
-    }
+    <VAR_KEYWORD> (
+            try{
+            tmp=VariableDeclaration(){variables.addAll(tmp);}
+            }catch(ParseException paex){
+                errorLog.logSyntaxError(paex);
+            }
+        )*
     {
         this.semanticStack.popBlock();
         return new VarBlock(variables);
@@ -194,8 +195,9 @@ ConstBlock ConstBlock() :
      ArrayList<ConstDeclaration> constants = new ArrayList();
 }
 {
-    try{
     <CONST_KEYWORD> (
+        try{
+
       identifier=<IDENTIFIER> <COLON> typeIdentifier=TypeIdentifier() <EQ_OP> constant=Constant() <SEMICOLON>
       {
             newConstant = new SymbolEntry(
@@ -213,11 +215,10 @@ ConstBlock ConstBlock() :
               }
 
           }
+        }catch(ParseException paex){
+            errorLog.logSyntaxError(paex);
+        }
     )*
-    }catch(ParseException pex){
-        errorLog.logSyntaxError(pex);
-        return new ConstBlock();
-    }
 
     {
     semanticStack.popBlock();
@@ -231,14 +232,19 @@ CodeBlock CodeBlock() :
     Statement tmp=null;
 }
 {
-   try{
-  <BEGIN_KEYWORD>
-  (tmp=Statement() {statements.add(tmp);})*
+//   try{
+  <BEGIN_KEYWORD> (
+    try{
+        tmp=Statement() {statements.add(tmp);}
+    }catch(ParseException paex){
+        errorLog.logSyntaxError(paex);
+    }
+  )*
   <END_KEYWORD>
-  }catch(ParseException pex){
-    errorLog.logSyntaxError(pex);
-    return new CodeBlock();
-  }
+//  }catch(ParseException pex){
+//    errorLog.logSyntaxError(pex);
+//    return new CodeBlock();
+//  }
   {return new CodeBlock(statements);}
 }
 
