@@ -66,7 +66,7 @@ public class SimpleExpression extends AST{
     public ArrayList<Quadruple> generateIntermediateCode() {
         ArrayList<Quadruple> ir = firstTerm.generateIntermediateCode();
         String last = ir.getLast().getResult();
-        for(int i = 1,j=0; i<otherTerms.size(); i++,j++){
+        for(int i = 0,j=0; i<otherTerms.size(); i++,j++){
             ir.addAll(otherTerms.get(i).generateIntermediateCode());
             String current = ir.getLast().getResult();
             ir.add(new Quadruple(
