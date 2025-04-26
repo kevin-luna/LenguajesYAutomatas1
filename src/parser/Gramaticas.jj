@@ -174,8 +174,11 @@ VarBlock VarBlock() :
 {
     <VAR_KEYWORD> (
             try{
-            tmp=VariableDeclaration(){variables.addAll(tmp);}
+            tmp=VariableDeclaration(){
+                variables.addAll(tmp);
+            }
             }catch(ParseException paex){
+                System.out.println("El error está en el bloque var");
                 errorLog.logSyntaxError(paex);
             }
         )*
@@ -192,7 +195,7 @@ ConstBlock ConstBlock() :
     Constant constant=null;
      String constName = "";
      SymbolEntry newConstant = null;
-     ArrayList<ConstDeclaration> constants = new ArrayList();
+     ArrayList<ConstDeclaration> constants = new ArrayList<>();
 }
 {
     <CONST_KEYWORD> (
@@ -358,7 +361,7 @@ SimpleExpression SimpleExpression():
     Token sign=null,op=null;
     Term firstTerm = null,curr=null,prev=null;
     ArrayList<Term> otherTerms= new ArrayList<>();
-    ArrayList<String> operators = new ArrayList();
+    ArrayList<String> operators = new ArrayList<>();
     boolean simpleExpressionIsValid=true;
  }
 {
@@ -531,7 +534,7 @@ UnsignedConstant UnsignedConstant():
 {
     try{
 
-    (identifier=<IDENTIFIER> {
+    identifier=<IDENTIFIER> {
         if(semanticAnalyzer.checkSymbolExists(identifier.image, identifier.beginLine)){
             return new UnsignedConstant(
                 identifier.image,
@@ -541,7 +544,7 @@ UnsignedConstant UnsignedConstant():
     }
     | numericLiteral=UnsignedNumber() {return new UnsignedConstant(numericLiteral.getValue(), numericLiteral.getType());}/*| <NIL_KEYWORD> */
     | charLiteral=<CHAR_CONSTANT> {return new UnsignedConstant(charLiteral.image, DataType.CHAR);}
-    | stringLiteral=<STRING_CONSTANT> {return new UnsignedConstant(stringLiteral.image,DataType.STRING);})
+    | stringLiteral=<STRING_CONSTANT> {return new UnsignedConstant(stringLiteral.image,DataType.STRING);}
     | (booleanLiteral=<TRUE_KEYWORD> | booleanLiteral=<FALSE_KEYWORD> ) {return new UnsignedConstant(booleanLiteral.image,DataType.BOOLEAN);}
     }catch(ParseException paex){
          errorLog.logSyntaxError(paex);
@@ -619,7 +622,7 @@ ArrayList<VariableDeclaration> VariableDeclaration():
     int varDimension = 0;
 
     SymbolEntry tmp = new SymbolEntry();
-    ArrayList<String> names = new ArrayList();
+    ArrayList<String> names = new ArrayList<>();
      ArrayList<VariableDeclaration> variables = new ArrayList<>();
  }
 {
@@ -638,7 +641,8 @@ ArrayList<VariableDeclaration> VariableDeclaration():
       } )* <COLON>
 )
 
-typeIdentifier=TypeIdentifier() <SEMICOLON>
+
+typeIdentifier=TypeIdentifier()
 {
     varDataType = DataTypes.getDataType(typeIdentifier.image);
     if(arrayKeyword!=null){
@@ -658,12 +662,22 @@ typeIdentifier=TypeIdentifier() <SEMICOLON>
             }
         }
     }
-    this.semanticStack.popBlock();
-    return variables;
+
 }
     }catch(ParseException paex){
          errorLog.logSyntaxError(paex);
-         return new ArrayList<VariableDeclaration>();
+     }
+
+     try{
+        <SEMICOLON>
+        {return variables;}
+     }catch(ParseException paex){
+        errorLog.logSyntaxError(paex);
+     }
+
+     {
+        this.semanticStack.popBlock();
+          return variables;
      }
 }
 
