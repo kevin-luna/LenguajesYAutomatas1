@@ -10,6 +10,8 @@ public enum IRInstruction {
     OR, // Calcula la operacion op1 OR op2 y lo pone en res
     XOR, // Calcula la operacion op1 XOR op2 y lo pone en res
     NOT, // Calcula la operacion NOT op1 y lo pone en res
+    LSF, //Realiza un desplazamiento hacia la izquierda de op1 bits sobre op2
+    RSF, //Realiza un desplazamiento hacia la derecha de op1 bits sobre op2
     EQ, //Comprueba que op1 = op2 y lo pone en res
     NEQ, //Comprueba que op1 != op2 y lo pone en res
     LT, //Comprueba que op1 < op2 y lo pone en res
@@ -58,6 +60,10 @@ public enum IRInstruction {
                 return "XOR";
             case NOT:
                 return "NOT";
+            case LSF:
+                return "LSF";
+            case RSF:
+                return "RSF";
             case EQ:
                 return "EQ";
             case NEQ:
