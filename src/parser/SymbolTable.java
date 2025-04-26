@@ -38,6 +38,12 @@ public class SymbolTable {
         symbolTable.remove(symbol.getName());
     }
 
+    public int getUsages(String symbol){
+        if(symbolTable.containsKey(symbol))
+            return symbolTable.get(symbol).getUsages();
+        return 0;
+    }
+
     public void printUsages(){
         for(SymbolEntry se: symbolTable.values()){
             System.out.println(se.getName()+" "+se.getUsages());

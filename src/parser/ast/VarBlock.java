@@ -22,7 +22,7 @@ public class VarBlock extends Block{
     public ArrayList<Quadruple> generateIntermediateCode() {
         ArrayList<Quadruple> ir = new ArrayList<>();
         for(VariableDeclaration v : variables){
-            if(v!=null){
+            if(v!=null &&  this.symbolTableCpy.getUsages(v.getName())>0){
                 IRInstruction ins = null;
                 switch (v.type){
                     case DataType.INTEGER -> {

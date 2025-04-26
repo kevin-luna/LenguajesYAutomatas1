@@ -31,7 +31,7 @@ public class ConstBlock extends Block{
     public ArrayList<Quadruple> generateIntermediateCode(){
         ArrayList<Quadruple> ir = new ArrayList<>();
         for(ConstDeclaration cd : constants){
-            if(cd!=null){
+            if(cd!=null && this.symbolTableCpy.getUsages(cd.getName())>0){
                 IRInstruction ins = null;
                 switch (cd.getDataType()){
                     case DataType.INTEGER -> {

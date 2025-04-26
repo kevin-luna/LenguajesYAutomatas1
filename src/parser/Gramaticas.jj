@@ -137,7 +137,23 @@ Program Program() :
   //La gramática comentada acepta la palabra reservada "uses" para importar librerías.
   //<PROGRAM_KEYWORD> <IDENTIFIER> (<LPAREN> <IDENTIFIER> (<COMMA> <IDENTIFIER>)* <RPAREN> )?  <SEMICOLON> (UseStatement())* (Block())+ <PERIOD>
   try{
-  <PROGRAM_KEYWORD> identifier=<IDENTIFIER>  <SEMICOLON> (constBlock=ConstBlock())? varBlock=VarBlock()  codeBlock=CodeBlock() <PERIOD>
+  <PROGRAM_KEYWORD> identifier=<IDENTIFIER>  <SEMICOLON>
+  (constBlock=ConstBlock(){
+      if(constBlock!=null){
+          constBlock.attachSymbolTable(symbolTable);
+      }
+  }
+  )?
+  varBlock=VarBlock()
+  {
+      if(varBlock!=null){
+        varBlock.attachSymbolTable(symbolTable);
+      }
+  }
+  codeBlock=CodeBlock(){
+
+  }
+  <PERIOD>
   }catch(ParseException paex){
     errorLog.logSyntaxError(paex);
     return new Program();
