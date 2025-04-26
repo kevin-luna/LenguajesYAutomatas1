@@ -38,6 +38,12 @@ public class SymbolTable {
         symbolTable.remove(symbol.getName());
     }
 
+    public void printUsages(){
+        for(SymbolEntry se: symbolTable.values()){
+            System.out.println(se.getName()+" "+se.getUsages());
+        }
+    }
+
     public void print(){
         System.out.println("--TABLA DE SIMBOLOS--");
         System.out.println("NAME" + "|" + "VALUE" + "|" + "DEFLINE" + "|" + "TYPE" + "|" + "TYPE" + "|" + "LEN" + "|" + "SIZE" + "|" + "DIMENSION" + "|");

@@ -11,6 +11,7 @@ public class SymbolEntry {
     private int len;
     private int size;
     private int dimension;
+    private int usages;
 
     public SymbolEntry(){}
 
@@ -89,6 +90,17 @@ public class SymbolEntry {
         this.dimension = dimension;
     }
 
+    public int getUsages() {
+        return usages;
+    }
+
+    public void setUsages(int usages) {
+        this.usages = usages;
+    }
+
+    public void addUsage(){
+        ++this.usages;
+    }
     @Override
     public String toString() {
         return "(" + name + "," + value + "," + defLine + "," + type + "," + dataType + "," + len + "," + size + "," + dimension + ")";
