@@ -68,12 +68,40 @@ public class Term extends AST{
         for(int i = 0,j=0; i<otherFactors.size(); i++, j++){
             ir.addAll(otherFactors.get(i).generateIntermediateCode());
             String curr = ir.getLast().getResult();
-            ir.add(new Quadruple(decodeInstruction(operators.get(j)),
-                    last,
-                    curr,
-                    TempVarGenerator.getNewInstance()
-                    )
-            );
+            IRInstruction ins = decodeInstruction(operators.get(j));
+            //Multiplicaciones y divisiones por 1 no se generan
+            if(ir.getLast().getOp1().equals("1")){
+                if(ins==IRInstruction.MUL || ins==IRInstruction.DIV) {
+                    last = curr;
+                    continue;
+                }
+            }
+            //Operaciones de multiplicación y división por 2 son reemplazadas por desplazamientos de bits
+            if(ir.getLast().getOp1().equals("2")){
+                if(ins==IRInstruction.MUL){
+                    ir.add(new Quadruple(IRInstruction.LSF,
+                                    last,
+                                    curr,
+                                    TempVarGenerator.getNewInstance()
+                            )
+                    );
+                }else if(ins==IRInstruction.DIV){
+                    ir.add(new Quadruple(IRInstruction.RSF,
+                                    last,
+                                    curr,
+                                    TempVarGenerator.getNewInstance()
+                            )
+                    );
+                }
+
+            }else{
+                ir.add(new Quadruple(ins,
+                                last,
+                                curr,
+                                TempVarGenerator.getNewInstance()
+                        )
+                );
+            }
             last = ir.getLast().getResult();
         }
         return ir;
