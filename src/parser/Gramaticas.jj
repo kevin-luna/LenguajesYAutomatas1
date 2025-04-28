@@ -132,35 +132,79 @@ Program Program() :
     ConstBlock constBlock = null;
     VarBlock varBlock = null;
     CodeBlock codeBlock = null;
+    boolean ok = true;
 }
 {
   //La gramática comentada acepta la palabra reservada "uses" para importar librerías.
   //<PROGRAM_KEYWORD> <IDENTIFIER> (<LPAREN> <IDENTIFIER> (<COMMA> <IDENTIFIER>)* <RPAREN> )?  <SEMICOLON> (UseStatement())* (Block())+ <PERIOD>
-  try{
-  <PROGRAM_KEYWORD> identifier=<IDENTIFIER>  <SEMICOLON>
-  (constBlock=ConstBlock(){
-      if(constBlock!=null){
-          constBlock.attachSymbolTable(symbolTable);
+    try{
+        <PROGRAM_KEYWORD>
+    }catch(ParseException paex){
+        errorLog.logSyntaxError(paex);
+        ok = false;
+    }
+
+    try{
+        identifier=<IDENTIFIER>
+    }catch(ParseException paex){
+        errorLog.logSyntaxError(paex);
+        ok = false;
+    }
+
+    try{
+      <SEMICOLON>
+    }catch(ParseException paex){
+        errorLog.logSyntaxError(paex);
+        ok = false;
+    }
+
+    try{
+    (
+          constBlock=ConstBlock(){
+              if(constBlock!=null){
+                  constBlock.attachSymbolTable(symbolTable);
+              }
+          }
+    )?
+    }catch(ParseException paex){
+        errorLog.logSyntaxError(paex);
+        ok = false;
+    }
+
+    try{
+      varBlock=VarBlock()
+      {
+        if(varBlock!=null){
+          varBlock.attachSymbolTable(symbolTable);
+        }
       }
-  }
-  )?
-  varBlock=VarBlock()
+    }catch(ParseException paex){
+        errorLog.logSyntaxError(paex);
+        ok = false;
+    }
+
+
+    try{
+        codeBlock=CodeBlock()
+    }catch(ParseException paex){
+        errorLog.logSyntaxError(paex);
+        ok = false;
+    }
+
+    try{
+        <PERIOD>
+    }catch(ParseException paex){
+        errorLog.logSyntaxError(paex);
+        ok = false;
+    }
+
+
   {
-      if(varBlock!=null){
-        varBlock.attachSymbolTable(symbolTable);
-      }
-  }
-  codeBlock=CodeBlock(){
-
-  }
-  <PERIOD>
-  }catch(ParseException paex){
-    errorLog.logSyntaxError(paex);
+    if(ok){
+        this.semanticStack.popBlock();
+        return new Program(identifier.image, varBlock, constBlock, codeBlock);
+    }
     return new Program();
-  }
-
-  {this.semanticStack.popBlock();
-    return new Program(identifier.image, varBlock, constBlock, codeBlock);
   }
 }
 
@@ -200,7 +244,6 @@ VarBlock VarBlock() :
                 variables.addAll(tmp);
             }
             }catch(ParseException paex){
-                System.out.println("El error está en el bloque var");
                 errorLog.logSyntaxError(paex);
             }
         )*
@@ -218,41 +261,78 @@ ConstBlock ConstBlock() :
      String constName = "";
      SymbolEntry newConstant = null;
      ArrayList<ConstDeclaration> constants = new ArrayList<>();
+     boolean ok = true;
 }
 {
     <CONST_KEYWORD> (
         try{
-
-      identifier=<IDENTIFIER> <COLON> typeIdentifier=TypeIdentifier() <EQ_OP> constant=Constant() <SEMICOLON>
-      {
-            newConstant = new SymbolEntry(
-                                                    identifier.image,
-                                                    constant.getValue(),
-                                                    identifier.beginLine,
-                                                    SymbolType.CONSTANT,
-                                                    DataTypes.getDataType(typeIdentifier.image),
-                                                    1,
-                                                    0
-                              );
-              if(!semanticAnalyzer.checkConstantRedefinition(newConstant)){
-                  symbolTable.addSymbol(newConstant);
-                  constants.add(new ConstDeclaration(identifier.image,DataTypes.getDataType(typeIdentifier.image)));
-              }
-
-          }
+            identifier=<IDENTIFIER>
         }catch(ParseException paex){
             errorLog.logSyntaxError(paex);
+            ok=false;
+        }
+
+        try{
+            <COLON>
+        }catch(ParseException paex){
+            errorLog.logSyntaxError(paex);
+            ok=false;
+        }
+
+        try{
+            typeIdentifier=TypeIdentifier()
+        }catch(ParseException paex){
+            errorLog.logSyntaxError(paex);
+            ok=false;
+        }
+
+        try{
+            <EQ_OP>
+        }catch(ParseException paex){
+            errorLog.logSyntaxError(paex);
+            ok=false;
+        }
+
+        try{
+            constant=Constant()
+        }catch(ParseException paex){
+            errorLog.logSyntaxError(paex);
+            ok=false;
+        }
+
+        try{
+              <SEMICOLON>
+        }catch(ParseException paex){
+            errorLog.logSyntaxError(paex);
+            ok=false;
         }
     )*
 
     {
-    semanticStack.popBlock();
-    return new ConstBlock(constants);
-}
+        if(ok){
+              newConstant = new SymbolEntry(
+                                                      identifier.image,
+                                                      constant.getValue(),
+                                                      identifier.beginLine,
+                                                      SymbolType.CONSTANT,
+                                                      DataTypes.getDataType(typeIdentifier.image),
+                                                      1,
+                                                      0
+                                );
+            if(!semanticAnalyzer.checkConstantRedefinition(newConstant)){
+                symbolTable.addSymbol(newConstant);
+                constants.add(new ConstDeclaration(identifier.image,DataTypes.getDataType(typeIdentifier.image)));
+            }
+
+        }
+        semanticStack.popBlock();
+        return new ConstBlock(constants);
+    }
 }
 
 CodeBlock CodeBlock() :
 {
+    this.semanticStack.pushBlock(BlockType.CODE_BLOCK);
     ArrayList<Statement> statements = new ArrayList<>();
     Statement tmp=null;
 }
@@ -265,12 +345,19 @@ CodeBlock CodeBlock() :
         errorLog.logSyntaxError(paex);
     }
   )*
-  <END_KEYWORD>
+  try{
+    <END_KEYWORD>
+  }catch(ParseException paex){
+    errorLog.logSyntaxError(paex);
+  }
 //  }catch(ParseException paex){
 //    errorLog.logSyntaxError(paex);
 //    return new CodeBlock();
 //  }
-  {return new CodeBlock(statements);}
+  {
+    this.semanticStack.popBlock();
+    return new CodeBlock(statements);
+  }
 }
 
 Statement Statement() :
