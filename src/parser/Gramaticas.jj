@@ -887,18 +887,20 @@ ElseStatement ElseStatement():
         Statement statement=null;CodeBlock codeBlock=null;
 }
 {
-    try{
+    <ELSE_KEYWORD>
 
-    <ELSE_KEYWORD> (statement=Statement() | codeBlock=CodeBlock() <SEMICOLON> )
-    {
-        if(statement!=null)return new ElseStatement(statement);
-        semanticStack.popBlock();
-        return new ElseStatement(codeBlock);
-    }
+    try{
+        (statement=Statement() | codeBlock=CodeBlock() <SEMICOLON> )
     }catch(ParseException paex){
          errorLog.logSyntaxError(paex);
-         return new ElseStatement();
-     }
+    }
+
+    {
+        semanticStack.popBlock();
+        if(statement!=null)return new ElseStatement(statement);
+        if(codeBlock!=null)return new ElseStatement(codeBlock);
+        return new ElseStatement();
+    }
 }
 
 //void CaseStatement():
