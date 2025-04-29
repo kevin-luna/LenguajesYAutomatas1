@@ -338,7 +338,8 @@ CodeBlock CodeBlock() :
 }
 {
 //   try{
-  <BEGIN_KEYWORD> (
+  <BEGIN_KEYWORD>
+  (
     try{
         tmp=Statement() {statements.add(tmp);}
     }catch(ParseException paex){
@@ -367,7 +368,7 @@ Statement Statement() :
     //La gramática comentada acepta la llamada a procedimientos y funciones
     //AssignmentStatement() | ProcedureCall() <SEMICOLON> | FunctionCall() <SEMICOLON> | IfStatement() | CaseStatement() | RepeatStatement() | WhileStatement() | ForStatement()
     try{
-        (stmt=AssignmentStatement() | stmt=BreakStatement() | stmt=ContinueStatement() | stmt=ForStatement() | stmt=IfStatement() | stmt=ReadCall() | stmt=ReadlnCall() | stmt=WhileStatement() | stmt=WriteCall() | stmt=WritelnCall())
+        (LOOKAHEAD(1) stmt=AssignmentStatement() | LOOKAHEAD(1) stmt=BreakStatement() | LOOKAHEAD(1) stmt=ContinueStatement() | LOOKAHEAD(1) stmt=ForStatement() | LOOKAHEAD(1) stmt=IfStatement() | LOOKAHEAD(1) stmt=ReadCall() | LOOKAHEAD(1) stmt=ReadlnCall() | LOOKAHEAD(1) stmt=WhileStatement() | LOOKAHEAD(1) stmt=WriteCall() | LOOKAHEAD(1) stmt=WritelnCall())
     }catch(ParseException paex){
         errorLog.logSyntaxError(paex);
         Token t;
@@ -583,7 +584,15 @@ Factor Factor():
     //FunctionCall() | <IDENTIFIER>  | Constant() | Variable() | UnsignedConstant() | <LPAREN> Expression() <RPAREN> | <NOT_KEYWORD> Factor() | <LBRACKET> Expression() (<RANGE_OP> Expression())? (<COMMA> Expression() (<RANGE_OP> Expression())?)* <RBRACKET>
     try{
 
-     (variable=Variable() {if(variable!=null){symbolTable.getSymbol(variable.getName()).addUsage();}return new Factor(variable);}
+     (LOOKAHEAD(2) variable=Variable() {
+         if(variable!=null){
+            SymbolEntry tmpSymbol = symbolTable.getSymbol(variable.getName());
+            if(tmpSymbol!=null){
+                tmpSymbol.addUsage();
+            }
+         }
+         return new Factor(variable);
+     }
     | unsignedConstant=UnsignedConstant() {return new Factor(unsignedConstant);}
     | <LPAREN> expr=Expression() <RPAREN> { return new Factor(expr,(lparen!=null && rparen!=null) ? true:false);}
     | notKeyword=<NOT_KEYWORD> factor=Factor(){
@@ -724,7 +733,7 @@ ArrayList<VariableDeclaration> VariableDeclaration():
     this.semanticStack.pushBlock(BlockType.VAR_BLOCK);
     Token name=null,typeIdentifier=null,arrayKeyword=null,arrayLen=null;
 
-    int varDefLine;
+    int varDefLine=0;
     SymbolType varSymbolType = SymbolType.VARIABLE;
     DataType varDataType = null;
     int varLen = 1;
@@ -732,59 +741,117 @@ ArrayList<VariableDeclaration> VariableDeclaration():
 
     SymbolEntry tmp = new SymbolEntry();
     ArrayList<String> names = new ArrayList<>();
-     ArrayList<VariableDeclaration> variables = new ArrayList<>();
- }
+    ArrayList<VariableDeclaration> variables = new ArrayList<>();
+    boolean ok = true;
+}
 {
     try{
-
-
-    name=<IDENTIFIER>
-{
-    varDefLine = name.beginLine;
-    names.add(name.image);
-}
-( <COLON> arrayKeyword=<ARRAY_KEYWORD> <LBRACKET> arrayLen=<INTEGER_CONSTANT> <RBRACKET> <OF_KEYWORD>
-    | (<COMMA> name=<IDENTIFIER>
-      {
-          names.add(name.image);
-      } )* <COLON>
-)
-
-
-typeIdentifier=TypeIdentifier()
-{
-    varDataType = DataTypes.getDataType(typeIdentifier.image);
-    if(arrayKeyword!=null){
-        varSymbolType = SymbolType.ARRAY;
-        varLen=Integer.parseInt(arrayLen.image);
-        tmp = new SymbolEntry(name.image,null,varDefLine,varSymbolType,varDataType,varLen,varDimension);
-        if(!semanticAnalyzer.checkArrayRedefinition(tmp)){
-            variables.add(new VariableDeclaration(name.image,DataTypes.getDataType(typeIdentifier.image),Integer.parseInt(arrayLen.image)));
-            symbolTable.addSymbol(tmp);
-        }
-    }else{
-        for(String id: names){
-            tmp = new SymbolEntry(id,null,varDefLine,varSymbolType,varDataType,varLen,varDimension);
-            if(!semanticAnalyzer.checkVariableRedefinition(tmp)){
-                variables.add(new VariableDeclaration(id,DataTypes.getDataType(typeIdentifier.image)));
-                symbolTable.addSymbol(tmp);
-            }
-        }
+     name=<IDENTIFIER>
+     {
+        varDefLine = name.beginLine;
+        names.add(name.image);
+     }
+    }catch(ParseException paex){
+        errorLog.logSyntaxError(paex);
+        ok = false;
     }
 
-}
+    (
+        try{
+            <COMMA>
+        }catch(ParseException paex){
+            errorLog.logSyntaxError(paex);
+            ok = false;
+        }
+
+        try{
+            name=<IDENTIFIER>
+            {
+                names.add(name.image);
+            }
+        }catch(ParseException paex){
+            errorLog.logSyntaxError(paex);
+            ok = false;
+        }
+    )*
+
+    try{
+        <COLON>
     }catch(ParseException paex){
          errorLog.logSyntaxError(paex);
-     }
+         ok = false;
+    }
+
+    (
+    try{
+        arrayKeyword=<ARRAY_KEYWORD>
+    }catch(ParseException paex){
+        errorLog.logSyntaxError(paex);
+         ok = false;
+    }
+    try{
+        <LBRACKET>
+    }catch(ParseException paex){
+         errorLog.logSyntaxError(paex);
+         ok = false;
+    }
+    try{
+        arrayLen=<INTEGER_CONSTANT>
+    }catch(ParseException paex){
+         errorLog.logSyntaxError(paex);
+         ok = false;
+    }
+    try{
+        <RBRACKET>
+    }catch(ParseException paex){
+         errorLog.logSyntaxError(paex);
+         ok = false;
+    }
+    try{
+        <OF_KEYWORD>
+    }catch(ParseException paex){
+         errorLog.logSyntaxError(paex);
+         ok = false;
+    }
+    )?
+
+    try{
+        typeIdentifier=TypeIdentifier()
+        {
+            varDataType = DataTypes.getDataType(typeIdentifier.image);
+        }
+    }catch(ParseException paex){
+        errorLog.logSyntaxError(paex);
+        ok = false;
+    }
 
      try{
         <SEMICOLON>
-        {return variables;}
      }catch(ParseException paex){
         errorLog.logSyntaxError(paex);
+        ok = false;
      }
 
      {
+        if(ok){
+            if(arrayKeyword!=null){
+                varSymbolType = SymbolType.ARRAY;
+                varLen=Integer.parseInt(arrayLen.image);
+                tmp = new SymbolEntry(name.image,null,varDefLine,varSymbolType,varDataType,varLen,varDimension);
+                if(!semanticAnalyzer.checkArrayRedefinition(tmp)){
+                    variables.add(new VariableDeclaration(name.image,DataTypes.getDataType(typeIdentifier.image),Integer.parseInt(arrayLen.image)));
+                    symbolTable.addSymbol(tmp);
+                }
+            }else{
+                for(String id: names){
+                    tmp = new SymbolEntry(id,null,varDefLine,varSymbolType,varDataType,varLen,varDimension);
+                    if(!semanticAnalyzer.checkVariableRedefinition(tmp)){
+                        variables.add(new VariableDeclaration(id,DataTypes.getDataType(typeIdentifier.image)));
+                        symbolTable.addSymbol(tmp);
+                    }
+                }
+            }
+        }
         this.semanticStack.popBlock();
           return variables;
      }
@@ -822,27 +889,52 @@ AssignmentStatement AssignmentStatement():
     Variable variable=null;
     Expression expression=null;
     Token assignmentOp=null;
+    boolean ok = true;
 }
 {
     try{
+        variable=Variable()
+        {
+            if(semanticAnalyzer.checkConstReassignment(variable.getName())){
+                errorLog.logSemanticError(assignmentOp.beginLine, "Rasignacion de constante "+variable.getName());
+            }
+        }
+    }catch(ParseException paex){
+        ok = false;
+         errorLog.logSyntaxError(paex);
+     }
 
-    variable=Variable() assignmentOp=<ASSIGN_OP> expression=Expression() <SEMICOLON>
-    {
-        if(!semanticAnalyzer.checkConstReassignment(variable.getName())){
+    try{
+        assignmentOp=<ASSIGN_OP>
+    }catch(ParseException paex){
+        ok = false;
+      errorLog.logSyntaxError(paex);
+    }
+
+    try{
+        expression=Expression(){
             if(!semanticAnalyzer.checkAssignment(variable,expression)){
                 errorLog.logSemanticError(assignmentOp.beginLine, "No se puede asignar un "+expression.getReturnType()+" a un "+variable.getDataType());
-            }else{
-                return new AssignmentStatement(variable,expression);
             }
-        }else{
-            errorLog.logSemanticError(assignmentOp.beginLine, "Rasignacion de constante "+variable.getName());
         }
-        return null;
-    }
     }catch(ParseException paex){
-         errorLog.logSyntaxError(paex);
-         return new AssignmentStatement();
-     }
+        ok = false;
+      errorLog.logSyntaxError(paex);
+    }
+
+    try{
+        <SEMICOLON>
+    }catch(ParseException paex){
+        ok = false;
+      errorLog.logSyntaxError(paex);
+    }
+
+    {
+        if(ok){
+            return new AssignmentStatement(variable,expression);
+        }
+        return AssignmentStatement();
+    }
 }
 
 IfStatement IfStatement():
@@ -918,25 +1010,43 @@ WhileStatement WhileStatement():
     CodeBlock codeBlock=null;
 }
 {
+    whileKeyword=<WHILE_KEYWORD>
     try{
-
-    whileKeyword=<WHILE_KEYWORD> expr=Expression()
-    {
-        if(expr.getReturnType()!=DataType.BOOLEAN){
-            errorLog.logSemanticError(whileKeyword.beginLine,"Se asigno una expresion no BOOLEANA al bloque WHILE");
-            return new WhileStatement();
+        expr=Expression()
+        {
+            if(expr.getReturnType()!=DataType.BOOLEAN){
+                errorLog.logSemanticError(whileKeyword.beginLine,"Se asigno una expresion no BOOLEANA al bloque WHILE");
+            }
         }
-    }
-     <DO_KEYWORD> (stmt=Statement() | codeBlock=CodeBlock() <SEMICOLON> )
-     {
-        semanticStack.popBlock();
-        if(stmt!=null)return new WhileStatement(expr,stmt);
-        return new WhileStatement(expr,codeBlock);
-    }
     }catch(ParseException paex){
          errorLog.logSyntaxError(paex);
-         return new WhileStatement();
-     }
+    }
+
+    try{
+        <DO_KEYWORD>
+    }catch(ParseException paex){
+        errorLog.logSyntaxError(paex);
+    }
+
+    try{
+        (
+            stmt=Statement() | codeBlock=CodeBlock()
+            try{
+                <SEMICOLON>
+            }catch(ParseException paex){
+                errorLog.logSyntaxError(paex);
+            }
+        )
+    }catch(ParseException paex){
+        errorLog.logSyntaxError(paex);
+    }
+
+    {
+     semanticStack.popBlock();
+     if(stmt!=null)return new WhileStatement(expr,stmt);
+     if(codeBlock!=null)return new WhileStatement(expr,codeBlock);
+     return new WhileStatement();
+    }
 }
 
 //void RepeatStatement():

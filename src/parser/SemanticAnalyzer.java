@@ -110,15 +110,18 @@ public class SemanticAnalyzer {
     }
 
     public boolean checkExpression(SimpleExpression expr1, SimpleExpression expr2, int line){
+        if(expr1 == null || expr2 == null){
+            return false;
+        }
         if(expr1.getReturnType() == expr2.getReturnType()){
             return true;
         }
         errorLog.logSemanticError(
                 line,
                 "No se puede comparar un tipo "
-                +expr1.getReturnType().toString()
+                +expr1.getReturnType()
                 +" con un tipo "
-                +expr2.getReturnType().toString()
+                +expr2.getReturnType()
         );
         return false;
     }
