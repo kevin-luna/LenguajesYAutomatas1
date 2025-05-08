@@ -2,7 +2,7 @@ options {
     STATIC = false;
     IGNORE_CASE = true;
     BUILD_PARSER = true;
-    LOOKAHEAD = 2;
+    LOOKAHEAD = 1;
     FORCE_LA_CHECK = true;
 }
 
