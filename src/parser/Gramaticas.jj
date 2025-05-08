@@ -368,7 +368,7 @@ Statement Statement() :
     //La gramática comentada acepta la llamada a procedimientos y funciones
     //AssignmentStatement() | ProcedureCall() <SEMICOLON> | FunctionCall() <SEMICOLON> | IfStatement() | CaseStatement() | RepeatStatement() | WhileStatement() | ForStatement()
     try{
-        (LOOKAHEAD(1) stmt=AssignmentStatement() | LOOKAHEAD(1) stmt=BreakStatement() | LOOKAHEAD(1) stmt=ContinueStatement() | LOOKAHEAD(1) stmt=ForStatement() | LOOKAHEAD(1) stmt=IfStatement() | LOOKAHEAD(1) stmt=ReadCall() | LOOKAHEAD(1) stmt=ReadlnCall() | LOOKAHEAD(1) stmt=WhileStatement() | LOOKAHEAD(1) stmt=WriteCall() | LOOKAHEAD(1) stmt=WritelnCall())
+        ( stmt=AssignmentStatement() |  stmt=BreakStatement() |  stmt=ContinueStatement() |  stmt=ForStatement() |  stmt=IfStatement() |  stmt=ReadCall() |  stmt=ReadlnCall() |  stmt=WhileStatement() |  stmt=WriteCall() |  stmt=WritelnCall())
     }catch(ParseException paex){
         errorLog.logSyntaxError(paex);
         Token t;
@@ -584,7 +584,7 @@ Factor Factor():
     //FunctionCall() | <IDENTIFIER>  | Constant() | Variable() | UnsignedConstant() | <LPAREN> Expression() <RPAREN> | <NOT_KEYWORD> Factor() | <LBRACKET> Expression() (<RANGE_OP> Expression())? (<COMMA> Expression() (<RANGE_OP> Expression())?)* <RBRACKET>
     try{
 
-     (LOOKAHEAD(2) variable=Variable() {
+     (variable=Variable() {
          if(variable!=null){
             SymbolEntry tmpSymbol = symbolTable.getSymbol(variable.getName());
             if(tmpSymbol!=null){
@@ -652,15 +652,15 @@ UnsignedConstant UnsignedConstant():
 {
     try{
 
-    identifier=<IDENTIFIER> {
-        if(semanticAnalyzer.checkSymbolExists(identifier.image, identifier.beginLine)){
-            return new UnsignedConstant(
-                identifier.image,
-                symbolTable.getDataType(identifier.image)
-            );
-        }
-    }
-    | numericLiteral=UnsignedNumber() {return new UnsignedConstant(numericLiteral.getValue(), numericLiteral.getType());}/*| <NIL_KEYWORD> */
+//    identifier=<IDENTIFIER> {
+//        if(semanticAnalyzer.checkSymbolExists(identifier.image, identifier.beginLine)){
+//            return new UnsignedConstant(
+//                identifier.image,
+//                symbolTable.getDataType(identifier.image)
+//            );
+//        }
+//    }
+    numericLiteral=UnsignedNumber() {return new UnsignedConstant(numericLiteral.getValue(), numericLiteral.getType());}/*| <NIL_KEYWORD> */
     | charLiteral=<CHAR_CONSTANT> {return new UnsignedConstant(charLiteral.image, DataType.CHAR);}
     | stringLiteral=<STRING_CONSTANT> {return new UnsignedConstant(stringLiteral.image,DataType.STRING);}
     | (booleanLiteral=<TRUE_KEYWORD> | booleanLiteral=<FALSE_KEYWORD> ) {return new UnsignedConstant(booleanLiteral.image,DataType.BOOLEAN);}
@@ -894,11 +894,6 @@ AssignmentStatement AssignmentStatement():
 {
     try{
         variable=Variable()
-        {
-            if(semanticAnalyzer.checkConstReassignment(variable.getName())){
-                errorLog.logSemanticError(assignmentOp.beginLine, "Rasignacion de constante "+variable.getName());
-            }
-        }
     }catch(ParseException paex){
         ok = false;
          errorLog.logSyntaxError(paex);
@@ -906,6 +901,11 @@ AssignmentStatement AssignmentStatement():
 
     try{
         assignmentOp=<ASSIGN_OP>
+        {
+            if(assignmentOp!=null && semanticAnalyzer.checkConstReassignment(variable.getName())){
+                errorLog.logSemanticError(assignmentOp.beginLine, "Rasignacion de constante "+variable.getName());
+            }
+        }
     }catch(ParseException paex){
         ok = false;
       errorLog.logSyntaxError(paex);
@@ -913,7 +913,7 @@ AssignmentStatement AssignmentStatement():
 
     try{
         expression=Expression(){
-            if(!semanticAnalyzer.checkAssignment(variable,expression)){
+            if(assignmentOp!=null && !semanticAnalyzer.checkAssignment(variable,expression)){
                 errorLog.logSemanticError(assignmentOp.beginLine, "No se puede asignar un "+expression.getReturnType()+" a un "+variable.getDataType());
             }
         }
