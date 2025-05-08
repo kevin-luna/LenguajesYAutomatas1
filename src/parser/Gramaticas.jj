@@ -2,7 +2,7 @@ options {
     STATIC = false;
     IGNORE_CASE = true;
     BUILD_PARSER = true;
-    LOOKAHEAD = 1;
+    LOOKAHEAD = 2;
     FORCE_LA_CHECK = true;
 }
 
@@ -371,10 +371,6 @@ Statement Statement() :
         ( stmt=AssignmentStatement() |  stmt=BreakStatement() |  stmt=ContinueStatement() |  stmt=ForStatement() |  stmt=IfStatement() |  stmt=ReadCall() |  stmt=ReadlnCall() |  stmt=WhileStatement() |  stmt=WriteCall() |  stmt=WritelnCall())
     }catch(ParseException paex){
         errorLog.logSyntaxError(paex);
-        Token t;
-        do {
-          t = getNextToken();
-        } while (t.kind != SEMICOLON);
     }
     {
         return stmt;
@@ -933,7 +929,7 @@ AssignmentStatement AssignmentStatement():
         if(ok){
             return new AssignmentStatement(variable,expression);
         }
-        return AssignmentStatement();
+        return new AssignmentStatement();
     }
 }
 
@@ -956,7 +952,7 @@ IfStatement IfStatement():
             return new IfStatement();
         }
     }
-     <THEN_KEYWORD> (stmt=Statement() | codeBlock=CodeBlock() <SEMICOLON>)  (elseStmt=ElseStatement())?
+     <THEN_KEYWORD> (LOOKAHEAD(2) stmt=Statement() | LOOKAHEAD(2) codeBlock=CodeBlock() <SEMICOLON>)  ( LOOKAHEAD(2) elseStmt=ElseStatement())?
      {
 
         semanticStack.popBlock();
