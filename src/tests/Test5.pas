@@ -18,7 +18,7 @@ begin
             read(calif);
             sum2 := sum2 + calif;
         end;
-        sum := sum2
+        sum := sum2;
     end;
     prom := sum/n;
     writeln('El promedio es',prom);

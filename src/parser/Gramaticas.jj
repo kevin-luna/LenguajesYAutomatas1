@@ -2,7 +2,7 @@ options {
     STATIC = false;
     IGNORE_CASE = true;
     BUILD_PARSER = true;
-    LOOKAHEAD = 2;
+    LOOKAHEAD = 1;
     FORCE_LA_CHECK = true;
 }
 
@@ -952,7 +952,7 @@ IfStatement IfStatement():
             return new IfStatement();
         }
     }
-     <THEN_KEYWORD> (LOOKAHEAD(2) stmt=Statement() | LOOKAHEAD(2) codeBlock=CodeBlock() <SEMICOLON>)  ( LOOKAHEAD(2) elseStmt=ElseStatement())?
+     <THEN_KEYWORD> (stmt=Statement() | codeBlock=CodeBlock() <SEMICOLON>)  (elseStmt=ElseStatement())?
      {
 
         semanticStack.popBlock();
