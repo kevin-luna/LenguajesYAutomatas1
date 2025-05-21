@@ -76,32 +76,12 @@ public class Term extends AST{
                     continue;
                 }
             }
-            //Operaciones de multiplicación y división por 2 son reemplazadas por desplazamientos de bits
-            if(ir.getLast().getOp1().equals("2")){
-                if(ins==IRInstruction.MUL){
-                    ir.add(new Quadruple(IRInstruction.LSF,
-                                    last,
-                                    curr,
-                                    TempVarGenerator.getNewInstance()
-                            )
-                    );
-                }else if(ins==IRInstruction.DIV){
-                    ir.add(new Quadruple(IRInstruction.RSF,
-                                    last,
-                                    curr,
-                                    TempVarGenerator.getNewInstance()
-                            )
-                    );
-                }
-
-            }else{
                 ir.add(new Quadruple(ins,
                                 last,
                                 curr,
                                 TempVarGenerator.getNewInstance()
                         )
                 );
-            }
             last = ir.getLast().getResult();
         }
         return ir;

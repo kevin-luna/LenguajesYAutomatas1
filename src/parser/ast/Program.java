@@ -66,6 +66,17 @@ public class Program extends AST {
         if(constBlock!=null)intermediateCode.addAll(constBlock.generateIntermediateCode());
         if(varBlock!=null)intermediateCode.addAll(varBlock.generateIntermediateCode());
         intermediateCode.addAll(codeBlock.generateIntermediateCode());
+        //Optimizaciones de mirilla
+        for(Quadruple q : intermediateCode){
+            if(q.getInstruction()==IRInstruction.DIV && q.getOp2().equals("2")){
+                q.setInstruction(IRInstruction.RSF);
+                q.setOp2("1");
+            }else if(q.getInstruction()==IRInstruction.MUL && q.getOp1().equals("2")){
+                q.setInstruction(IRInstruction.LSF);
+                q.setOp1("1");
+            }
+        }
+
         return intermediateCode;
     }
 
