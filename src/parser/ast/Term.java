@@ -6,6 +6,7 @@ import parser.Quadruple;
 import parser.TempVarGenerator;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Term extends AST{
@@ -107,7 +108,34 @@ public class Term extends AST{
 
     @Override
     public void generateCode(BufferedWriter outputFile) {
-
+        try{
+            firstFactor.generateCode(outputFile);
+            for(int i=0;i<otherFactors.size();i++){
+                String op = "";
+                switch (operators.get(i)){
+                    case "AND" -> {
+                        op = " && ";
+                        break;
+                    }
+                    case "MOD" -> {
+                        op = " % ";
+                        break;
+                    }
+                    case "DIV" -> {
+                        op = "/";
+                        break;
+                    }
+                    default -> {
+                        op = "*";
+                        break;
+                    }
+                }
+                outputFile.write(op);
+                otherFactors.get(i).generateCode(outputFile);
+            }
+        }catch (IOException ioException){
+            throw new RuntimeException(ioException);
+        }
     }
 
     @Override

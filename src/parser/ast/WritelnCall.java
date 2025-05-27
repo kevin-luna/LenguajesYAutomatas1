@@ -4,6 +4,7 @@ import parser.IRInstruction;
 import parser.Quadruple;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class WritelnCall extends WriteCall{
@@ -28,7 +29,19 @@ public class WritelnCall extends WriteCall{
 
     @Override
     public void generateCode(BufferedWriter outputFile) {
-
+        try{
+            outputFile.write("cout");
+            for(Expression exp : expressions){
+                outputFile.write("<<");
+                exp.generateCode(outputFile);
+            }
+            outputFile.write("<<");
+            outputFile.write("\"\\n\"");
+            outputFile.write(";");
+            outputFile.newLine();
+        }catch (IOException ioException){
+            throw new RuntimeException(ioException);
+        }
     }
 
     @Override

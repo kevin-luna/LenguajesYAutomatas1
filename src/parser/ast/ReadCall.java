@@ -5,6 +5,7 @@ import parser.IRInstruction;
 import parser.Quadruple;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class ReadCall extends Statement{
@@ -64,7 +65,18 @@ public class ReadCall extends Statement{
 
     @Override
     public void generateCode(BufferedWriter outputFile) {
-
+        try{
+            outputFile.write("cin>>");
+            outputFile.write(variables.get(0).getName());
+            for(int i=1; i<variables.size(); i++){
+                outputFile.write(">>");
+                outputFile.write(variables.get(i).getName());
+            }
+            outputFile.write(";");
+            outputFile.newLine();
+        }catch (IOException ioException){
+            throw new RuntimeException(ioException);
+        }
     }
 
     @Override

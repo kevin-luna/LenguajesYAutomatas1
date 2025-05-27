@@ -5,6 +5,7 @@ import parser.Quadruple;
 import parser.TempLblGenerator;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class WhileStatement extends Statement{
@@ -72,7 +73,18 @@ public class WhileStatement extends Statement{
 
     @Override
     public void generateCode(BufferedWriter outputFile) {
-
+        try{
+            outputFile.write("while");
+            outputFile.write("(");
+            this.expr.generateCode(outputFile);
+            outputFile.write(")");
+            outputFile.newLine();
+            if(statement!=null) statement.generateCode(outputFile);
+            else codeBlock.generateCode(outputFile);
+            outputFile.newLine();
+        }catch (IOException ioException){
+            throw new RuntimeException(ioException);
+        }
     }
 
     @Override

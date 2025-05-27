@@ -4,6 +4,7 @@ import parser.IRInstruction;
 import parser.Quadruple;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class AssignmentStatement extends Statement{
@@ -47,7 +48,15 @@ public class AssignmentStatement extends Statement{
 
     @Override
     public void generateCode(BufferedWriter outputFile) {
-
+        try{
+            outputFile.write(variable.getName());
+            outputFile.write("=");
+            expression.generateCode(outputFile);
+            outputFile.write(";");
+            outputFile.newLine();
+        }catch (IOException ioException){
+            throw new RuntimeException(ioException);
+        }
     }
 
     @Override

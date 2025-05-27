@@ -84,15 +84,20 @@ public class Program extends AST {
     @Override
     public void generateCode(BufferedWriter outputFile) {
         try {
-            outputFile.write("#include <stdio.h>");
+            outputFile.write("#include <iostream>");
+            outputFile.newLine();
+            outputFile.write("#include <limits.h>");
+            outputFile.newLine();
+            outputFile.write("using namespace std;");
             outputFile.newLine();
             this.constBlock.generateCode(outputFile);
             outputFile.newLine();
-            outputFile.write("int main(){");
-            outputFile.newLine();
             this.varBlock.generateCode(outputFile);
+            outputFile.newLine();
+            outputFile.write("int main()");
+            outputFile.newLine();
             this.codeBlock.generateCode(outputFile);
-        outputFile.write("}");
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

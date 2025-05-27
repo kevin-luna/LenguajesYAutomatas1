@@ -6,6 +6,7 @@ import parser.Quadruple;
 import parser.TempVarGenerator;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Factor extends AST{
@@ -16,6 +17,7 @@ public class Factor extends AST{
     private Factor factor;
     private DataType returnType;
     private Boolean negated;
+    private FactorType type;
 
     public enum FactorType{
         VARIABLE, UNSIGNED_CONSTANT, EXPRESSION, FACTOR;
@@ -27,28 +29,33 @@ public class Factor extends AST{
     public Factor(Variable variable){
         this.variable = variable;
         this.returnType = variable.getDataType();
+        this.type = FactorType.VARIABLE;
     }
 
     public Factor(UnsignedConstant unsignedConstant){
         this.unsignedConstant = unsignedConstant;
         this.returnType = unsignedConstant.getType();
+        this.type = FactorType.UNSIGNED_CONSTANT;
     }
 
     public Factor(Expression expression, boolean evalFirst){
         this.expression = expression;
         this.returnType = expression.getReturnType();
         this.evalFirst = evalFirst;
+        this.type = FactorType.EXPRESSION;
     }
 
     public Factor(Factor factor){
         this.factor = factor;
         this.returnType = factor.getReturnType();
+        this.type = FactorType.FACTOR;
     }
 
     public Factor(Factor variable, boolean negated){
         this.variable = variable.getVariable();
         this.negated = negated;
         this.returnType = DataType.BOOLEAN;
+        this.type = FactorType.FACTOR;
     }
 
     public Variable getVariable() {
@@ -122,7 +129,31 @@ public class Factor extends AST{
 
     @Override
     public void generateCode(BufferedWriter outputFile) {
-
+        try{
+            switch (this.type){
+                case VARIABLE -> {
+                    outputFile.write(variable.getName());
+                    break;
+                }
+                case UNSIGNED_CONSTANT -> {
+                    outputFile.write(unsignedConstant.getValue());
+                    break;
+                }
+                case EXPRESSION -> {
+                    if(this.evalFirst)outputFile.write("(");
+                    expression.generateCode(outputFile);
+                    if(this.evalFirst)outputFile.write(")");
+                    break;
+                }
+                case FACTOR -> {
+                    if(this.negated!=null)outputFile.write("!");
+                    factor.generateCode(outputFile);
+                    break;
+                }
+            }
+        }catch (IOException ioException){
+            throw new RuntimeException(ioException);
+        }
     }
 
     @Override

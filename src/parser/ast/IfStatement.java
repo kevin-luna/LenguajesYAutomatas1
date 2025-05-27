@@ -5,6 +5,7 @@ import parser.Quadruple;
 import parser.TempLblGenerator;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class IfStatement extends Statement{
@@ -89,7 +90,21 @@ public class IfStatement extends Statement{
 
     @Override
     public void generateCode(BufferedWriter outputFile) {
-
+        try {
+            outputFile.write("if");
+            outputFile.write("(");
+            this.condition.generateCode(outputFile);
+            outputFile.write(")");
+            outputFile.newLine();
+            if(block!=null) block.generateCode(outputFile);
+            else statement.generateCode(outputFile);
+            outputFile.newLine();
+            if(elseStatement!=null) {
+                elseStatement.generateCode(outputFile);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

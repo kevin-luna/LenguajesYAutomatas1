@@ -6,6 +6,7 @@ import parser.Quadruple;
 import parser.TempVarGenerator;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class SimpleExpression extends AST{
@@ -98,7 +99,16 @@ public class SimpleExpression extends AST{
 
     @Override
     public void generateCode(BufferedWriter outputFile) {
-
+        try{
+            firstTerm.generateCode(outputFile);
+            for(int i=0;i<otherTerms.size();i++){
+                String op = operators.get(i);
+                outputFile.write(op.equalsIgnoreCase("or") ? "||" : op);
+                otherTerms.get(i).generateCode(outputFile);
+            }
+        }catch (IOException ioException){
+            throw new RuntimeException(ioException);
+        }
     }
 
     @Override

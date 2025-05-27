@@ -5,6 +5,7 @@ import parser.IRInstruction;
 import parser.Quadruple;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class WriteCall extends Statement{
@@ -65,7 +66,17 @@ public class WriteCall extends Statement{
 
     @Override
     public void generateCode(BufferedWriter outputFile) {
-
+        try{
+            outputFile.write("cout");
+            for(Expression exp : expressions){
+                outputFile.write("<<");
+                exp.generateCode(outputFile);
+            }
+            outputFile.write(";");
+            outputFile.newLine();
+        }catch (IOException ioException){
+            throw new RuntimeException(ioException);
+        }
     }
 
     @Override

@@ -6,6 +6,7 @@ import parser.Quadruple;
 import parser.TempVarGenerator;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Expression extends AST{
@@ -106,7 +107,26 @@ public class Expression extends AST{
 
     @Override
     public void generateCode(BufferedWriter outputFile) {
-
+        try{
+            leftOperand.generateCode(outputFile);
+            String op = "";
+            switch (this.operator){
+                case "=" -> {
+                    op = "==";
+                    break;
+                }
+                case "<>" -> {
+                    op = "!=";
+                    break;
+                }
+            }
+            outputFile.write(this.operator);
+            if(rightOperand != null){
+                rightOperand.generateCode(outputFile);
+            }
+        }catch (IOException ioException){
+            throw new RuntimeException(ioException);
+        }
     }
 
     @Override

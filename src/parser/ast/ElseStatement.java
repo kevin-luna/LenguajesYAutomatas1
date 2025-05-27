@@ -3,6 +3,7 @@ package parser.ast;
 import parser.Quadruple;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class ElseStatement extends AST{
@@ -48,7 +49,14 @@ public class ElseStatement extends AST{
 
     @Override
     public void generateCode(BufferedWriter outputFile) {
-
+        try{
+            outputFile.write("else");
+            outputFile.newLine();
+            if(statement!=null) statement.generateCode(outputFile);
+            else codeBlock.generateCode(outputFile);
+        }catch (IOException ioException){
+            throw new RuntimeException(ioException);
+        }
     }
 
     @Override

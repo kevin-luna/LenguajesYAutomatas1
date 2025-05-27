@@ -2,6 +2,8 @@ package parser.ast;
 
 import parser.Quadruple;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class CodeBlock extends Block{
@@ -29,6 +31,22 @@ public class CodeBlock extends Block{
 
     public void setStatements(ArrayList<Statement> statements) {
         this.statements = statements;
+    }
+
+    @Override
+    public void generateCode(BufferedWriter outputFile){
+        try {
+            outputFile.write("{");
+            outputFile.newLine();
+            for(Statement s: statements ){
+                s.generateCode(outputFile);
+            }
+            outputFile.newLine();
+            outputFile.write("}");
+            outputFile.newLine();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

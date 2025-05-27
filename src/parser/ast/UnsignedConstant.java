@@ -13,7 +13,7 @@ public class UnsignedConstant extends AST{
     public UnsignedConstant(){}
 
     public UnsignedConstant(String value, DataType type) {
-        this.value = value;
+        this.value = value.replace('\'', '\"');;
         this.type = type;
     }
 
