@@ -2,6 +2,7 @@ package parser.ast;
 
 import parser.*;
 
+import java.io.BufferedWriter;
 import java.util.ArrayList;
 
 public class ReadlnCall extends ReadCall{
@@ -56,7 +57,7 @@ public class ReadlnCall extends ReadCall{
     }
 
     @Override
-    public void generateCode() {
+    public void generateCode(BufferedWriter outputFile) {
 
     }
 

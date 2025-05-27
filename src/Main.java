@@ -1,8 +1,8 @@
 import parser.*;
 import parser.ast.Program;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 
 
@@ -22,12 +22,16 @@ public class Main {
                 parser.printErrors();
             }else{
                 System.out.println("No se encontraron errores");
-                parser.printUsages();
-                System.out.println("Generando el codigo intermedio...");
-                ArrayList<Quadruple> ir = program.generateIntermediateCode();
-                for(Quadruple q: ir){
-                    System.out.println(q);
-                }
+//                parser.printUsages();
+//                System.out.println("Generando el codigo intermedio...");
+//                ArrayList<Quadruple> ir = program.generateIntermediateCode();
+//                for(Quadruple q: ir){
+//                    System.out.println(q);
+//                }
+                File inputFile = new File(ruta);
+                BufferedWriter tmpCFile = new BufferedWriter(new FileWriter(inputFile.getParent()+"/tmp.c"));
+                program.generateCode(tmpCFile);
+                tmpCFile.close();
             }
         }catch(ParseException e){
             //System.out.println("Error: " + e.getMessage());
@@ -37,6 +41,8 @@ public class Main {
             System.out.println("No se encontró el archivo: " + e.getMessage());
         }catch (TokenMgrError e){
             System.out.println("Error: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("No se pudo escribir el archivo de salida");
         }
 
     }

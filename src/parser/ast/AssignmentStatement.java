@@ -3,7 +3,7 @@ package parser.ast;
 import parser.IRInstruction;
 import parser.Quadruple;
 
-import java.lang.reflect.Array;
+import java.io.BufferedWriter;
 import java.util.ArrayList;
 
 public class AssignmentStatement extends Statement{
@@ -46,7 +46,7 @@ public class AssignmentStatement extends Statement{
     }
 
     @Override
-    public void generateCode() {
+    public void generateCode(BufferedWriter outputFile) {
 
     }
 

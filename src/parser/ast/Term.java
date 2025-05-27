@@ -5,6 +5,7 @@ import parser.IRInstruction;
 import parser.Quadruple;
 import parser.TempVarGenerator;
 
+import java.io.BufferedWriter;
 import java.util.ArrayList;
 
 public class Term extends AST{
@@ -105,7 +106,7 @@ public class Term extends AST{
     }
 
     @Override
-    public void generateCode() {
+    public void generateCode(BufferedWriter outputFile) {
 
     }
 

@@ -2,6 +2,7 @@ package parser.ast;
 
 import parser.Quadruple;
 
+import java.io.BufferedWriter;
 import java.util.ArrayList;
 
 public abstract class Statement extends AST{
@@ -35,7 +36,7 @@ public abstract class Statement extends AST{
     }
 
     @Override
-    public void generateCode() {
+    public void generateCode(BufferedWriter outputFile) {
 
     }
 

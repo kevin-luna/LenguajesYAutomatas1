@@ -5,6 +5,7 @@ import parser.IRInstruction;
 import parser.Quadruple;
 import parser.TempVarGenerator;
 
+import java.io.BufferedWriter;
 import java.util.ArrayList;
 
 public class Factor extends AST{
@@ -120,7 +121,7 @@ public class Factor extends AST{
     }
 
     @Override
-    public void generateCode() {
+    public void generateCode(BufferedWriter outputFile) {
 
     }
 

@@ -4,6 +4,8 @@ import parser.DataType;
 import parser.IRInstruction;
 import parser.Quadruple;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class VarBlock extends Block{
@@ -54,7 +56,24 @@ public class VarBlock extends Block{
     }
 
     @Override
-    public void generateCode() {}
+    public void generateCode(BufferedWriter outputFile) {
+        for(VariableDeclaration v : variables){
+            String dt = "";
+            switch (v.type){
+                case DataType.INTEGER -> dt = "int";
+                case DataType.REAL -> dt = "double";
+                case DataType.CHAR -> dt = "char";
+                case DataType.BOOLEAN -> dt = "bool";
+                case DataType.STRING -> dt = "string";
+            }
+            try {
+                outputFile.write(dt+" "+v.getName()+";");
+                outputFile.newLine();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 
     @Override
     public void print(int level) {

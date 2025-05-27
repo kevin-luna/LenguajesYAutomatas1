@@ -3,6 +3,7 @@ package parser.ast;
 import parser.DataType;
 import parser.Quadruple;
 
+import java.io.BufferedWriter;
 import java.util.ArrayList;
 
 public class Constant extends UnsignedConstant{
@@ -31,7 +32,7 @@ public class Constant extends UnsignedConstant{
     }
 
     @Override
-    public void generateCode() {
+    public void generateCode(BufferedWriter outputFile) {
 
     }
 

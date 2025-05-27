@@ -2,6 +2,7 @@ package parser.ast;
 
 import parser.Quadruple;
 
+import java.io.BufferedWriter;
 import java.util.ArrayList;
 
 public class Block extends AST {
@@ -37,7 +38,7 @@ public class Block extends AST {
     }
 
     @Override
-    public void generateCode() {
+    public void generateCode(BufferedWriter outputFile) {
 
     }
 

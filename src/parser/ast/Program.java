@@ -3,7 +3,8 @@ package parser.ast;
 import parser.IRInstruction;
 import parser.Quadruple;
 
-import java.lang.reflect.Array;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Program extends AST {
@@ -81,8 +82,20 @@ public class Program extends AST {
     }
 
     @Override
-    public void generateCode() {
-
+    public void generateCode(BufferedWriter outputFile) {
+        try {
+            outputFile.write("#include <stdio.h>");
+            outputFile.newLine();
+            this.constBlock.generateCode(outputFile);
+            outputFile.newLine();
+            outputFile.write("int main(){");
+            outputFile.newLine();
+            this.varBlock.generateCode(outputFile);
+            this.codeBlock.generateCode(outputFile);
+        outputFile.write("}");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

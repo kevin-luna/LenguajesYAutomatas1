@@ -3,20 +3,23 @@ package parser.ast;
 import parser.DataType;
 import parser.Quadruple;
 
+import java.io.BufferedWriter;
 import java.util.ArrayList;
 
 public class ConstDeclaration extends AST {
 
     private String name;
     private DataType dataType;
+    private String value;
 
     public ConstDeclaration(){
 
     }
 
-    public ConstDeclaration(String name,DataType dataType) {
+    public ConstDeclaration(String name, DataType dataType, String value) {
         this.name = name;
         this.dataType = dataType;
+        this.value = value;
     }
 
     public String getName() {
@@ -35,6 +38,14 @@ public class ConstDeclaration extends AST {
         this.dataType = dataType;
     }
 
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
     @Override
     public void traverse() {
 
@@ -47,7 +58,7 @@ public class ConstDeclaration extends AST {
     }
 
     @Override
-    public void generateCode() {
+    public void generateCode(BufferedWriter outputFile) {
 
     }
 

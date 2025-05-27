@@ -4,6 +4,7 @@ import parser.IRInstruction;
 import parser.Quadruple;
 import parser.TempLblGenerator;
 
+import java.io.BufferedWriter;
 import java.util.ArrayList;
 
 public class IfStatement extends Statement{
@@ -87,7 +88,7 @@ public class IfStatement extends Statement{
     }
 
     @Override
-    public void generateCode() {
+    public void generateCode(BufferedWriter outputFile) {
 
     }
 

@@ -2,12 +2,11 @@ package parser.ast;
 
 import parser.DataType;
 import parser.IRInstruction;
-import parser.IRInstruction.*;
 import parser.Quadruple;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
-
-import parser.IRInstruction;
 
 public class ConstBlock extends Block{
     private ArrayList<ConstDeclaration> constants;
@@ -62,8 +61,24 @@ public class ConstBlock extends Block{
     }
 
     @Override
-    public void generateCode() {
-
+    public void generateCode(BufferedWriter outputFile) {
+        try{
+            for(ConstDeclaration cd : constants){
+                String dt = "";
+                switch (cd.getDataType()){
+                    case DataType.INTEGER -> dt = "int";
+                    case DataType.REAL -> dt = "double";
+                    case DataType.CHAR -> dt = "char";
+                    case DataType.BOOLEAN -> dt = "bool";
+                    case DataType.STRING -> dt = "string";
+                    //default -> dt = "int";
+                }
+                outputFile.write("const "+dt+" "+cd.getName()+"="+cd.getValue()+";");
+                outputFile.newLine();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

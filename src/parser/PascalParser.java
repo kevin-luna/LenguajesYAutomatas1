@@ -4,7 +4,7 @@ package parser;
 import java.util.ArrayList;
 import parser.ast.*;
 import parser.ast.ForStatement.ForMode;
-import parser.ast.VariableDeclaration.VariableType;
+
 public class PascalParser implements PascalParserConstants {
     private SymbolTable symbolTable = new SymbolTable();
     private ErrorLog errorLog = new ErrorLog();
@@ -223,7 +223,7 @@ if(ok){
                                 );
             if(!semanticAnalyzer.checkConstantRedefinition(newConstant)){
                 symbolTable.addSymbol(newConstant);
-                constants.add(new ConstDeclaration(identifier.image,DataTypes.getDataType(typeIdentifier.image)));
+                constants.add(new ConstDeclaration(identifier.image,DataTypes.getDataType(typeIdentifier.image), constant.getValue() ));
             }
 
         }

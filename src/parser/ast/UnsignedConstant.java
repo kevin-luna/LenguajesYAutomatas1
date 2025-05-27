@@ -3,7 +3,7 @@ package parser.ast;
 import parser.DataType;
 import parser.Quadruple;
 
-import java.sql.SQLOutput;
+import java.io.BufferedWriter;
 import java.util.ArrayList;
 
 public class UnsignedConstant extends AST{
@@ -44,7 +44,7 @@ public class UnsignedConstant extends AST{
     }
 
     @Override
-    public void generateCode() {
+    public void generateCode(BufferedWriter outputFile) {
 
     }
 

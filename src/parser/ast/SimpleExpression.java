@@ -5,6 +5,7 @@ import parser.IRInstruction;
 import parser.Quadruple;
 import parser.TempVarGenerator;
 
+import java.io.BufferedWriter;
 import java.util.ArrayList;
 
 public class SimpleExpression extends AST{
@@ -96,7 +97,7 @@ public class SimpleExpression extends AST{
     }
 
     @Override
-    public void generateCode() {
+    public void generateCode(BufferedWriter outputFile) {
 
     }
 

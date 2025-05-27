@@ -4,7 +4,7 @@ import parser.DataType;
 import parser.IRInstruction;
 import parser.Quadruple;
 
-import java.sql.SQLOutput;
+import java.io.BufferedWriter;
 import java.util.ArrayList;
 
 public class ReadCall extends Statement{
@@ -63,7 +63,7 @@ public class ReadCall extends Statement{
     }
 
     @Override
-    public void generateCode() {
+    public void generateCode(BufferedWriter outputFile) {
 
     }
 
