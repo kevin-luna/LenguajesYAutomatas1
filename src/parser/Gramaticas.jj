@@ -172,7 +172,7 @@ Program Program() :
     }
 
     try{
-      varBlock=VarBlock()
+      (varBlock=VarBlock())?
       {
         if(varBlock!=null){
           varBlock.attachSymbolTable(symbolTable);
