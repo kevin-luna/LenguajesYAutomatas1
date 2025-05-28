@@ -90,9 +90,9 @@ public class Program extends AST {
             outputFile.newLine();
             outputFile.write("using namespace std;");
             outputFile.newLine();
-            this.constBlock.generateCode(outputFile);
+            if(constBlock!=null)this.constBlock.generateCode(outputFile);
             outputFile.newLine();
-            this.varBlock.generateCode(outputFile);
+            if(varBlock!=null)this.varBlock.generateCode(outputFile);
             outputFile.newLine();
             outputFile.write("int main()");
             outputFile.newLine();
