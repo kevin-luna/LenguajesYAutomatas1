@@ -57,7 +57,7 @@ public class Main {
                 generateAssemblyCode.inheritIO();
                 generateAssemblyCode.start().waitFor();
 
-                ProcessBuilder generateExe = new ProcessBuilder("C:\\cygwin64\\bin\\g++.exe","-o",inputFile.getParent()+"\\"+inputFilename+".exe", tmpFile.toString() );
+                ProcessBuilder generateExe = new ProcessBuilder("C:\\cygwin64\\bin\\g++.exe","-O2","-o",inputFile.getParent()+"\\"+inputFilename+".exe", tmpFile.toString() );
                 generateExe.inheritIO();
                 generateExe.start().waitFor();
                 tmpFile.delete();
