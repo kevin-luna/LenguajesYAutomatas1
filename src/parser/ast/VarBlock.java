@@ -4,6 +4,7 @@ import parser.DataType;
 import parser.IRInstruction;
 import parser.Quadruple;
 
+import javax.xml.crypto.Data;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,7 +68,11 @@ public class VarBlock extends Block{
                 case DataType.STRING -> dt = "string";
             }
             try {
-                outputFile.write(dt+" "+v.getName()+";");
+                outputFile.write(dt+" "+v.getName());
+                outputFile.write("=");
+                if(v.type == DataType.INTEGER)outputFile.write("0");
+                else if(v.type == DataType.REAL)outputFile.write("0.0");
+                outputFile.write(";");
                 outputFile.newLine();
             } catch (IOException e) {
                 throw new RuntimeException(e);
