@@ -5,6 +5,7 @@ import parser.Quadruple;
 import parser.TempLblGenerator;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class ForStatement extends Statement{
@@ -122,7 +123,28 @@ public class ForStatement extends Statement{
 
     @Override
     public void generateCode(BufferedWriter outputFile) {
-
+        try{
+            outputFile.write("for");
+            outputFile.write("(");
+            outputFile.write(variable.getName());
+            outputFile.write("=");
+            this.initialValue.generateCode(outputFile);
+            outputFile.write(";");
+            outputFile.write(variable.getName());
+            outputFile.write("==");
+            this.goal.generateCode(outputFile);
+            outputFile.write(";");
+            outputFile.write(variable.getName());
+            if(this.forMode==ForMode.TO)  outputFile.write("++");
+            else if(this.forMode==ForMode.DOWNTO) outputFile.write("--");
+            outputFile.write(")");
+            outputFile.newLine();
+            if(statement!=null) statement.generateCode(outputFile);
+            else codeBlock.generateCode(outputFile);
+            outputFile.newLine();
+        }catch (IOException ioException){
+            throw new RuntimeException(ioException);
+        }
     }
 
     @Override
