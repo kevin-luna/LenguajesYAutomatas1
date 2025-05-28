@@ -231,7 +231,7 @@ if(ok){
                                 );
             if(!semanticAnalyzer.checkConstantRedefinition(newConstant)){
                 symbolTable.addSymbol(newConstant);
-                constants.add(new ConstDeclaration(identifier.image,DataTypes.getDataType(typeIdentifier.image)),constant.getValue());
+                constants.add(new ConstDeclaration(identifier.image,DataTypes.getDataType(typeIdentifier.image),constant.getValue()));
             }
 
         }

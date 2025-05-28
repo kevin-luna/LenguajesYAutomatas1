@@ -53,11 +53,11 @@ public class Main {
 //                env.put("LIB",     "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\lib");
 //                env.put("PATH",    env.get("PATH") + "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin");
                 tmpCFileBuffer.close();
-                ProcessBuilder generateAssemblyCode = new ProcessBuilder("C:\\cygwin64\\bin\\g++.exe","-S","-o",inputFile.getParent()+"\\"+inputFilename+".s", tmpFile.toString() );
+                ProcessBuilder generateAssemblyCode = new ProcessBuilder("g++","-S","-o",inputFile.getParent()+"\\"+inputFilename+".s", tmpFile.toString() );
                 generateAssemblyCode.inheritIO();
                 generateAssemblyCode.start().waitFor();
 
-                ProcessBuilder generateExe = new ProcessBuilder("C:\\cygwin64\\bin\\g++.exe","-O2","-o",inputFile.getParent()+"\\"+inputFilename+".exe", tmpFile.toString() );
+                ProcessBuilder generateExe = new ProcessBuilder("g++","-O2","-o",inputFile.getParent()+"\\"+inputFilename+".exe", tmpFile.toString());
                 generateExe.inheritIO();
                 generateExe.start().waitFor();
                 tmpFile.delete();
