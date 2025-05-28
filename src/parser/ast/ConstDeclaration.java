@@ -20,6 +20,9 @@ public class ConstDeclaration extends AST {
         this.name = name;
         this.dataType = dataType;
         this.value = value;
+        if(this.dataType == DataType.STRING){
+            this.value = this.value.replace('\'','"');
+        }
     }
 
     public String getName() {
